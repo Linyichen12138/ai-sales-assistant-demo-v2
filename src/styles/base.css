@@ -1,0 +1,62 @@
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body, #root { height: 100%; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei', 'Noto Sans CJK SC', 'Noto Sans SC', 'Source Han Sans SC', 'Helvetica Neue', Arial, sans-serif;
+  background: #1B2033; color: #1A1D2E; -webkit-font-smoothing: antialiased;
+}
+button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
+input, textarea { font: inherit; }
+img { display: block; }
+.num { font-family: 'DIN Alternate', 'DIN Condensed', 'Bahnschrift', 'D-DIN', 'Roboto Condensed', 'Arial Narrow', 'Helvetica Neue', Arial, sans-serif; font-weight: 700; font-variant-numeric: tabular-nums; letter-spacing: -.01em; }
+.app { min-height: 100%; display: flex; flex-direction: column; }
+
+/* ---------- 演示控制栏 ---------- */
+.demobar { height: 56px; flex-shrink: 0; display: flex; align-items: center; gap: 20px; padding: 0 20px; background: #0E1224; color: #E6E9F5; border-bottom: 1px solid rgba(255,255,255,.08); position: sticky; top: 0; z-index: 50; font-size: 13px; }
+.db-left { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.db-left b { font-size: 15px; white-space: nowrap; }
+.db-tag { padding: 3px 8px; border-radius: 6px; background: rgba(59,59,245,.25); color: #B9C2FF; font-size: 12px; white-space: nowrap; }
+.db-roles { display: flex; align-items: center; gap: 6px; margin: 0 auto; background: rgba(255,255,255,.06); padding: 4px; border-radius: 22px; }
+.db-label { padding: 0 8px 0 10px; color: #8F97B8; font-size: 12px; }
+.db-roles button { display: flex; align-items: center; gap: 6px; height: 34px; padding: 0 14px 0 4px; border-radius: 18px; color: #AEB5D2; white-space: nowrap; }
+.db-roles button img { width: 26px; height: 26px; border-radius: 50%; }
+.db-roles button.on { background: linear-gradient(90deg, #2F6BFF, #4B3BF5 60%, #6A3CF0); color: #fff; box-shadow: 0 4px 14px rgba(75,59,245,.45); }
+.db-right { display: flex; align-items: center; gap: 8px; }
+.db-step { color: #AEB5D2; white-space: nowrap; max-width: 300px; overflow: hidden; text-overflow: ellipsis; }
+.db-btn { width: 30px; height: 30px; border-radius: 8px; background: rgba(255,255,255,.08); font-size: 20px; line-height: 1; color: #fff; }
+.db-btn:disabled { opacity: .3; cursor: default; }
+.db-guide { display: flex; align-items: center; gap: 6px; height: 34px; padding: 0 14px; border-radius: 8px; background: #fff; color: #3B3BF5; font-weight: 600; white-space: nowrap; }
+
+.stage { flex: 1; display: flex; align-items: center; justify-content: center; overflow: hidden; padding: 16px 12px; }
+.stage-phone { background: radial-gradient(1200px 700px at 50% 30%, #2A3152 0%, #161A2C 70%); }
+.stage-pc { background: #070A18; padding: 10px 12px; }
+
+/* ---------- 导览 ---------- */
+.guide-mask { position: fixed; inset: 0; background: rgba(5,8,20,.55); z-index: 100; display: flex; justify-content: flex-end; }
+.guide { width: 520px; max-width: 100%; height: 100%; background: #fff; display: flex; flex-direction: column; box-shadow: -20px 0 40px rgba(0,0,0,.3); animation: slideL .22s ease; }
+@keyframes slideL { from { transform: translateX(40px); opacity: 0; } }
+.guide-hd { display: flex; gap: 12px; padding: 20px 22px 14px; border-bottom: 1px solid #E3E8F2; }
+.guide-hd h3 { font-size: 18px; }
+.guide-hd p { margin-top: 6px; font-size: 12px; color: #5B6275; line-height: 1.6; }
+.guide-x { margin-left: auto; align-self: flex-start; color: #9AA1B2; }
+.guide-list { flex: 1; overflow: auto; padding: 10px 14px; }
+.guide-item { width: 100%; display: flex; align-items: center; gap: 12px; padding: 10px; border-radius: 10px; text-align: left; border: 1px solid transparent; }
+.guide-item:hover { background: #F4F7FC; }
+.guide-item.cur { background: #EAF3FF; border-color: #BFD3FF; }
+.gi-n { width: 28px; height: 28px; flex-shrink: 0; border-radius: 50%; background: linear-gradient(135deg, #2F6BFF, #6A3CF0); color: #fff; font-weight: 700; font-size: 13px; display: flex; align-items: center; justify-content: center; }
+.guide-item.mgr .gi-n { background: linear-gradient(135deg, #13215C, #3B3BF5); }
+.gi-body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+.gi-body b { font-size: 14px; }
+.gi-body small { color: #9AA1B2; font-size: 12px; }
+.gi-role { font-size: 12px; padding: 2px 8px; border-radius: 10px; white-space: nowrap; }
+.gi-role.c { background: #E6E8FF; color: #3B3BF5; }
+.gi-role.m { background: #13215C; color: #fff; }
+.guide-ft { display: flex; align-items: center; gap: 10px; padding: 14px 22px; border-top: 1px solid #E3E8F2; font-size: 12px; color: #5B6275; }
+.guide-reset { margin-left: auto; display: flex; align-items: center; gap: 6px; height: 36px; padding: 0 16px; border-radius: 8px; background: #FFEAF0; color: #F5455C; font-weight: 600; font-size: 14px; }
+
+@keyframes fadeIn { from { opacity: 0; } }
+@keyframes upIn { from { transform: translateY(30px); opacity: 0; } }
+@keyframes toastIn { from { transform: translate(-50%, -10px); opacity: 0; } }
+@keyframes shimmer { 0% { background-position: -200px 0; } 100% { background-position: 200px 0; } }
+@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: .35; } }
+.spin { animation: spin 1s linear infinite; }
