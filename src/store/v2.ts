@@ -51,6 +51,7 @@ interface V2State {
   cards: ActionCardData[]
   drawerCard: string | null
   drawerOpen: boolean
+  guidanceOpen: boolean
   visitStarted: boolean
   reviewConfirmed: boolean
   stagePendingApproval: boolean
@@ -60,6 +61,8 @@ interface V2State {
   updateCard: (id: string, patch: Partial<ActionCardData>) => void
   openEvidence: (id: string) => void
   closeEvidence: () => void
+  openGuidance: () => void
+  closeGuidance: () => void
   set: (patch: Partial<V2State>) => void
   notify: (text: string) => void
 }
@@ -67,10 +70,11 @@ interface V2State {
 let timer: ReturnType<typeof setTimeout> | undefined
 export const useV2 = create<V2State>((set) => ({
   role: 'sales', step: 1, selectedCompany: company.name, cards: initialCards, drawerCard: null, drawerOpen: false,
-  visitStarted: false, reviewConfirmed: false, stagePendingApproval: false, toast: null,
+  visitStarted: false, reviewConfirmed: false, stagePendingApproval: false, guidanceOpen: false, toast: null,
   setRole: (role) => set({ role }), setStep: (step) => set({ step }),
   updateCard: (id, patch) => set((s) => ({ cards: s.cards.map((c) => c.id === id ? { ...c, ...patch } : c) })),
   openEvidence: (id) => set({ drawerCard: id, drawerOpen: true }), closeEvidence: () => set({ drawerOpen: false }),
+  openGuidance: () => set({ guidanceOpen: true }), closeGuidance: () => set({ guidanceOpen: false }),
   set: (patch) => set(patch),
   notify: (text) => { clearTimeout(timer); set({ toast: text }); timer = setTimeout(() => set({ toast: null }), 2200) },
 }))

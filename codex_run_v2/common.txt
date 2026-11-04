@@ -1,0 +1,6 @@
+你在 /workspace/销售助理项目/前端Demo（Vite+React+TS+zustand+HashRouter+vite-plugin-singlefile）。任务：把 Demo 重做成「AI 工作台」三栏单页（左侧栏 ~320px、中间对话/内容、右侧对象上下文+行动卡）。暗色色板：底#20201D 抬升#292925 边框#34332E 用户气泡#3D3C37 主文字#FAF9F5 次#D1CFC5 弱#B0AEA5 陶土橙#B75A3B 珊瑚橙#E98F70 成功#5BB98C 风险#E5484D 卡片圆角14px；Logo 陶土橙 A 字形+「AI 智能营销」，AI 头像统一用该 A logo。
+设计依据（必须用 view_image 等方式逐张打开对照）：/workspace/销售助理项目/前端Demo/codex_run_v2/ref/ 下已缩到 960 宽的 UI-W01..W05、W09..W13 *_r2.png（只读这些缩小图，不要读原图；一次只看一张，只看本包相关的图），及 /workspace/销售助理项目/UI_工作台/出图规划_r2.md（务必读完）。
+可复用 src/store/v2.ts（禾川 mock、人名、ActionCardData 三维状态）、src/components/v2.tsx、src/styles/v2.css。新代码放 src/workbench/ 下，App.tsx 路由用 HashRouter，路由：/w01 /w02 /w03 /w04 /w05 /w09 /w10 /w11 /w12 /w13，默认重定向 /w01。旧页面可保留但不必入口。
+规则：所有人名/公司/金额/日期/数量假数据标「示例」，不得编造未标示例的数字；示例商机「禾川食品 · 2027 调味料供货商机（示例）」；行动卡标「未经确认不会写入」。
+禁止 rm -rf，禁止 git push / git commit。完成后运行 npm run build 必须通过；在 进度.md 末尾追加本包完成说明（北京时间）。
+本包任务：

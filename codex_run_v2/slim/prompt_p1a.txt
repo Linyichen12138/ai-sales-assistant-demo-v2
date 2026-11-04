@@ -1,0 +1,4 @@
+项目目录 /workspace/销售助理项目/前端Demo（Vite+React+TS+zustand+HashRouter+vite-plugin-singlefile，依赖已装）。目标：「AI 工作台」三栏单页（左栏 320px / 中栏对话或内容 / 右栏对象上下文+行动卡）。暗色：底#20201D 抬升#292925 边框#34332E 用户气泡#3D3C37 主文字#FAF9F5 次#D1CFC5 弱#B0AEA5 陶土橙#B75A3B 珊瑚橙#E98F70 成功#5BB98C 风险#E5484D，卡片圆角14px；Logo 陶土橙 A 字形+「AI 智能营销」，AI 头像统一用 A logo。新代码只放 src/workbench/（可复用 src/store/v2.ts、src/components/v2.tsx）。假数据都标「示例」，不编造未标示例的数字。附图是设计参考，直接看附图即可，不要去读其他图片或整份规划文档。
+禁止 rm -rf、git commit、git push。完成后 npm run build 必须通过；在 进度.md 末尾追加一行本包完成说明。
+本包：
+【p1a 三栏壳+路由骨架】新建 src/workbench/Shell.tsx（三栏布局，左栏插槽、中栏、右栏）、src/workbench/workbench.css、src/workbench/pages.tsx（10 个占位页 W01 W02 W03 W04 W05 W09 W10 W11 W12 W13，每页中栏显示页名占位，右栏空卡）。改 src/App.tsx：HashRouter，路由 /w01 /w02 /w03 /w04 /w05 /w09 /w10 /w11 /w12 /w13，默认重定向 /w01（旧页面路由可保留但不作为默认）。左栏先放一个简单占位（Logo+「＋ 新对话」），下一包会实现完整侧栏。整体比例参照附图 W01。

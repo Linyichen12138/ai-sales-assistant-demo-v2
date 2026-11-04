@@ -1,0 +1,1 @@
+【p1a 三栏壳+路由骨架】新建 src/workbench/Shell.tsx（三栏布局，左栏插槽、中栏、右栏）、src/workbench/workbench.css、src/workbench/pages.tsx（10 个占位页 W01 W02 W03 W04 W05 W09 W10 W11 W12 W13，每页中栏显示页名占位，右栏空卡）。改 src/App.tsx：HashRouter，路由 /w01 /w02 /w03 /w04 /w05 /w09 /w10 /w11 /w12 /w13，默认重定向 /w01（旧页面路由可保留但不作为默认）。左栏先放一个简单占位（Logo+「＋ 新对话」），下一包会实现完整侧栏。整体比例参照附图 W01。

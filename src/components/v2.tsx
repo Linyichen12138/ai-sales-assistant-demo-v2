@@ -8,8 +8,9 @@ export const kindClass: Record<CardKind, string> = { 事实: 'v2-fact', 推断: 
 export function V2DemoBar() {
   const nav = useNavigate(); const loc = useLocation(); const s = useV2()
   const steps = [
-    ['首页 · 线索', '/home'], ['统一收件箱', '/inbox'], ['建档与联系人', '/lead'], ['阶段变更', '/stage'], ['开始拜访', '/visit/start'],
-    ['对象工作台', '/workspace'], ['会后确认', '/visit/review'], ['意向行动卡', '/intent'], ['签约工作台', '/contract'], ['管理桌面', '/manage'],
+    ['首页 · 线索', '/home'], ['线索池', '/leads'], ['线索详情', '/lead/detail'], ['建档与联系人', '/lead'], ['阶段变更', '/stage'],
+    ['开始拜访', '/visit/start'], ['拜访方案', '/visit/plan'], ['对象工作台', '/workspace'], ['现场纪要', '/visit/notes'], ['会后确认', '/visit/review'],
+    ['复访准备', '/visit/followup'], ['离线草稿', '/offline'], ['意向行动卡', '/intent'], ['签约工作台', '/contract'], ['管理桌面', '/manage'],
   ] as const
   const active = steps.findIndex(([, p]) => loc.pathname === p) + 1
   return <header className="v2-demo-bar">
@@ -27,7 +28,7 @@ export function V2Shell({ children, title, eyebrow, compact = false }: { childre
   return <div className="v2-app"><V2DemoBar /><div className="v2-layout">
     <aside className="v2-side"><div className="v2-company"><span className="v2-company-dot" />{s.selectedCompany}<small>当前客户 · 示例公司</small></div>{menu.map(([label, path]) => <button key={path} className={loc.pathname === path || (path === '/workspace' && loc.pathname === '/visit/review') ? 'on' : ''} onClick={() => nav(path)}>{label}</button>)}<div className="v2-side-foot">数据范围<br /><b>华东大客户部（示例）</b></div></aside>
     <main className={compact ? 'v2-main compact' : 'v2-main'}><div className="v2-page-head"><div><p className="v2-eyebrow">{eyebrow || '销售工作台'}</p><h1>{title}</h1></div><div className="v2-head-actions"><button className="v2-ghost" onClick={() => nav('/screen')}>只读大屏</button><span className="v2-avatar">{roles.find((r) => r.key === s.role)?.name.slice(0, 1)}</span></div></div>{children}</main>
-  </div>{s.toast && <div className="v2-toast">{s.toast}</div>}<EvidenceDrawer /></div>
+  </div>{s.toast && <div className="v2-toast">{s.toast}</div>}<EvidenceDrawer /><GuidanceDrawer /></div>
 }
 
 export function Tag({ children, kind }: { children: ReactNode; kind?: CardKind }) { return <span className={`v2-tag ${kind ? kindClass[kind] : ''}`}>{children}</span> }
@@ -46,6 +47,11 @@ export function ActionCard({ card, compact = false }: { card: ActionCardData; co
 export function EvidenceDrawer() {
   const s = useV2(); const card = s.cards.find((c) => c.id === s.drawerCard); if (!s.drawerOpen || !card) return null
   return <div className="v2-drawer-mask" onClick={s.closeEvidence}><aside className="v2-evidence-drawer" onClick={(e) => e.stopPropagation()}><div className="v2-drawer-head"><div><p>依据抽屉</p><h2>{card.title}</h2></div><button onClick={s.closeEvidence}>×</button></div><div className="v2-drawer-body"><Tag kind={card.kind}>{card.kind}</Tag><h3>结论</h3><p>{card.conclusion}</p><h3>来源与范围</h3><dl><dt>来源</dt><dd>{card.source}</dd><dt>更新时间</dt><dd>{card.evidence}</dd><dt>可见范围</dt><dd>内部可见 · 当前商机</dd><dt>数据新鲜度</dt><dd>更新于 10:20</dd></dl>{card.staleReason && <div className="v2-stale">{card.staleReason}，确认前请刷新依据。</div>}</div><div className="v2-drawer-foot"><button className="v2-ghost" onClick={s.closeEvidence}>关闭</button><button className="v2-primary" onClick={() => { s.closeEvidence(); s.notify('已标记为待核实') }}>标记待核实</button></div></aside></div>
+}
+
+export function GuidanceDrawer() {
+  const s = useV2(); if (!s.guidanceOpen) return null
+  return <div className="v2-drawer-mask" onClick={s.closeGuidance}><aside className="v2-evidence-drawer" onClick={(e) => e.stopPropagation()}><div className="v2-drawer-head"><div><p>UI-121 · 现场指导</p><h2>拜访推进建议</h2></div><button onClick={s.closeGuidance}>×</button></div><div className="v2-drawer-body"><Tag kind="推断">AI 建议</Tag><h3>先确认，再承诺</h3><p>围绕样品评估标准、交付周期与审批节点逐项提问；涉及价格、赔付、交付保证时暂停自动写入，转人工确认。</p><h3>推荐话术</h3><div className="v2-guidance-quote">“为了给出准确方案，想先确认贵司的批次质检标准和春节前备货时间。”</div><h3>依据</h3><p>历史相似客户 · 华粮餐饮（示例公司）<br/>当前商机 · 会议纪要 v3</p></div><div className="v2-drawer-foot"><button className="v2-ghost" onClick={s.closeGuidance}>稍后查看</button><button className="v2-primary" onClick={() => { s.closeGuidance(); s.notify('已加入本次拜访重点') }}>加入拜访重点</button></div></aside></div>
 }
 
 export function StatusPill({ children, tone = 'blue' }: { children: ReactNode; tone?: 'blue' | 'purple' | 'orange' | 'green' }) { return <span className={`v2-status ${tone}`}>{children}</span> }

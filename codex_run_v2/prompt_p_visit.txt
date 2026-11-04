@@ -1,0 +1,10 @@
+续写 Demo v2。工作目录 `/workspace/销售助理项目/前端Demo/`。已有骨架：`src/App.tsx`、`src/store/v2.ts`、`src/components/v2.tsx`、`src/styles/v2.css`，`npm run build` 已通过，docs/ 已用于 Pages。
+
+本包目标（P-拜访 + 补线索细页，不砍主路径清单）：
+1. 在现有路由上补强/新增页面交互与文案对齐 UI_v2：UI-102 线索池、UI-105 线索详情、UI-112 拜访方案卡、UI-116 现场纪要、UI-126 复访准备、UI-129 离线草稿入口、UI-121/122 指导与依据抽屉（可做抽屉组件）。
+2. 保持卖方视角、禾川示例数据、三维状态行动卡、开始拜访、人工确认、无批量写入。
+3. DemoBar 主路径步骤串通上述页；更新 `进度.md`（v2 段）。
+4. `npm run build` 必须通过；把新 dist 复制到 `docs/index.html`。
+5. 禁止改 `release/v1/`；禁止 push；禁止 `rm -rf`。
+
+先读现有 App.tsx / v2 store / 验收路径.md，再增量修改，不要推倒重来。

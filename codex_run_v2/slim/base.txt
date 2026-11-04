@@ -1,0 +1,3 @@
+项目目录 ROOT（Vite+React+TS+zustand+HashRouter+vite-plugin-singlefile，依赖已装）。目标：「AI 工作台」三栏单页（左栏 320px / 中栏对话或内容 / 右栏对象上下文+行动卡）。暗色：底#20201D 抬升#292925 边框#34332E 用户气泡#3D3C37 主文字#FAF9F5 次#D1CFC5 弱#B0AEA5 陶土橙#B75A3B 珊瑚橙#E98F70 成功#5BB98C 风险#E5484D，卡片圆角14px；Logo 陶土橙 A 字形+「AI 智能营销」，AI 头像统一用 A logo。新代码只放 src/workbench/（可复用 src/store/v2.ts、src/components/v2.tsx）。假数据都标「示例」，不编造未标示例的数字。附图是设计参考，直接看附图即可，不要去读其他图片或整份规划文档。
+禁止 rm -rf、git commit、git push。完成后 npm run build 必须通过；在 进度.md 末尾追加一行本包完成说明。
+本包：

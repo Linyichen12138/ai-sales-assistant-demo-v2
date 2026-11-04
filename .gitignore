@@ -5,3 +5,8 @@ codex_run_v2/*.log
 codex_run_v2/watch*.heartbeat
 codex_run_v2/attempts*.log
 codex_run_v2/orch*.log
+codex_run_v2/slim/*.log
+codex_run_v2/slim/*.out
+codex_run_v2/ref/
+codex_run_v2/*.heartbeat
+dist/
