@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { HECHUAN, HECHUAN_QUOTE, HUALIANG, XIANYUAN } from './fixtures'
+import { HECHUAN, HUALIANG, XIANYUAN, quoteOf } from './fixtures'
 import { useWb } from './store'
 import { Acts, AiAva, Card, Ico, Pill, UserAva } from './ui'
 
@@ -94,7 +94,7 @@ export function W03() {
         <Msg who="ai"><p>我已整理本次复访的关键信息，请确认是否写入拜访纪要。</p></Msg>
         <div className="wb-msg ai"><span className="wb-ava-gap" /><table className="wb-table kv"><tbody>
           <tr><th>客户</th><td>禾川食品（示例公司）</td></tr><tr><th>拜访人</th><td>张帆（示例）</td></tr>
-          <tr><th>拜访时间</th><td>2025-01-15（示例）</td></tr>
+          <tr><th>拜访时间</th><td>2026-11-03（示例）</td></tr>
           <tr><th>沟通要点</th><td data-testid="w03-committed-points">{points}</td></tr>
           <tr><th>下一步</th><td data-testid="w03-committed-next">{next}</td></tr></tbody></table></div>
         <Msg who="me">采购窗口的时间我想再确认一下，先不写入。</Msg>
@@ -108,7 +108,7 @@ export function W03() {
         <h2>跟进周敏（示例）确认采购窗口</h2>
         <dl className="wb-kv">
           <dt>结论：</dt><dd>需与周敏（示例）确认采购窗口的具体时间。</dd>
-          <dt>依据：</dt><dd>本次复访中（2025-01-15，示例），客户表示采购计划预计在 3 月启动，仍需进一步确认。</dd>
+          <dt>依据：</dt><dd>本次复访中（2026-11-03，示例），客户表示采购计划预计在 3 月启动，仍需进一步确认。</dd>
           <dt>影响：</dt><dd>明确时间后可安排样品、报价及后续资源，避免进度迟误。</dd>
           <dt>下一步：</dt><dd>尽快联系周敏（示例），确认采购窗口时间。</dd>
           <dt>责任人：</dt><dd>张帆（示例）</dd><dt>权限：</dt><dd><b>可写入拜访纪要</b></dd></dl>
@@ -281,7 +281,7 @@ export function W11() {
     </main>
     <aside className="wb-right" data-testid="w11-rail">
       {focus === 'hualiang' ? <>
-        <Card><h2>样品试吃安排</h2><dl className="wb-kv lines">
+        <Card><h2>样品安排</h2><dl className="wb-kv lines">
           <dt>客户</dt><dd data-testid="w11-customer">{HUALIANG.company}</dd><dt>时间</dt><dd>11月5日 14:00（示例）</dd>
           <dt>样品清单</dt><dd>低钠酱油 2 箱（示例）<br />复合调味料 3 箱（示例）<br />火锅底料 2 箱（示例）</dd><dt>负责人</dt><dd>张帆（示例）</dd></dl></Card>
         <Card><h2>申请样品出库</h2><p>低钠酱油 2 箱、复合调味料 3 箱、火锅底料 2 箱（示例）</p><Acts id="w11-out" doneText="已提交样品出库申请（示例）" fields={[{ key: 'w11.sampleNote', label: '出库备注（示例）', initial: '按清单出库（示例）' }]} />
@@ -332,23 +332,26 @@ function W12Hualiang() {
 
 function W12Hechuan() {
   const nav = useNavigate()
-  const q = HECHUAN_QUOTE
+  const pick = useWb((s) => s.linePick)
+  const q = quoteOf(pick)
+  const a = quoteOf('A')
   return <>
     <main className="wb-main" data-testid="page-w12-hechuan">
       <Ctx text={HECHUAN.opp} pill={HECHUAN.stageVisit} />
       <h1 className="wb-title">禾川报价单（示例）</h1>
-      <p className="wb-sub">报价是动作，不改变当前阶段。此单不是华粮 ¥343.2 万。</p>
+      <p className="wb-sub">报价是动作，不改变当前阶段。当前只采用产线 {pick}，不与另一条产线相加。</p>
       <table className="wb-table" data-testid="hechuan-sheet"><tbody>
-        <tr><td>报价合计</td><td data-testid="hechuan-total">{q.total}（示例）</td></tr>
-        <tr><td>原料成本</td><td>{q.material}（示例）</td></tr>
-        <tr><td>产线 A（推荐）</td><td>{q.lineA}（示例）</td></tr>
-        <tr><td>采用 A 的总成本</td><td>{q.costA}（示例）</td></tr>
-        <tr><td>采用 A 的毛利</td><td>{q.profitA}，毛利率 {q.marginA}（示例）</td></tr>
+        <tr><td>报价合计</td><td data-testid="hechuan-total">{q.priceText}（示例）</td></tr>
+        <tr><td>原料成本</td><td>{q.materialText}（示例）</td></tr>
+        <tr><td>产线 A（推荐）</td><td>{a.lineText}（示例）</td></tr>
+        <tr><td>当前采用产线 {pick}</td><td>{q.lineText}（示例）</td></tr>
+        <tr><td>采用{pick}的总成本</td><td>{q.costText}（示例）</td></tr>
+        <tr><td>采用{pick}的毛利</td><td>{q.profitText}，毛利率 {q.margin}（示例）</td></tr>
         <tr><td>账期</td><td>{q.term}（示例）</td></tr>
       </tbody></table>
     </main>
     <aside className="wb-right">
-      <Card><h3>当前对象</h3><p>{HECHUAN.company}</p><p data-testid="hechuan-rail-amount">预计金额 {q.total}（示例）</p>
+      <Card><h3>当前对象</h3><p>{HECHUAN.company}</p><p data-testid="hechuan-rail-amount">预计金额 {q.priceText}（示例） · 产线 {pick} · 成本 {q.costText}（示例）</p>
         <button className="wb-btn primary" data-testid="hechuan-to-contract" onClick={() => nav('/w04')}>进入禾川签约 diff</button></Card>
     </aside>
   </>
