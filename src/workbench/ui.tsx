@@ -1,4 +1,4 @@
-import { useEffect, useState, type ReactNode } from 'react'
+import { useEffect, useState, type HTMLAttributes, type ReactNode } from 'react'
 import { useWb, type Decision } from './store'
 
 /** 离开页面时，未确认的编辑草稿丢弃，不写入。 */
@@ -41,12 +41,17 @@ const P: Record<string, string> = {
   send: 'M3 11l18-8-8 18-2-8z',
   spark: 'M12 3l2 7 7 2-7 2-2 7-2-7-7-2 7-2z',
   warn: 'M12 4l9 16H3z M12 10v4 M12 17v.5',
+  bolt: 'M13 2L4 14h7l-1 8 9-12h-7z',
+  flask: 'M9 3h6M10 3v6L5 20h14L14 9V3',
+  users: 'M8 12a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM16 11a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5zM3 20c1-3 3-5 5-5s4 2 5 5M14 15c2 0 4 1 5 4',
+  target: 'M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM12 16a4 4 0 1 0 0-8 4 4 0 0 0 0 8z',
+  wrench: 'M14 7a3 3 0 0 0-5 3L4 15l2 2 1-1 2 2-1 1 2 2 5-5a3 3 0 0 0 3-6l-2 2-2-2z',
 }
 export function Ico({ n, s = 16 }: { n: string; s?: number }) {
   return <svg className="wb-ico" width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d={P[n] || P.doc} /></svg>
 }
 export function Pill({ children, tone = 'terra' }: { children: ReactNode; tone?: 'terra' | 'coral' | 'ok' | 'risk' | 'muted' }) { return <span className={`wb-pill ${tone}`}>{children}</span> }
-export function Card({ children, className = '' }: { children: ReactNode; className?: string }) { return <section className={`wb-card ${className}`}>{children}</section> }
+export function Card({ children, className = '', ...rest }: { children: ReactNode; className?: string } & HTMLAttributes<HTMLElement>) { return <section className={`wb-card ${className}`} {...rest}>{children}</section> }
 
 export interface ActField { key: string; label: string; initial: string }
 

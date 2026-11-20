@@ -355,8 +355,18 @@ await check('D2', '窄屏从 W05 开始初访走到 W07 再返回', async () => 
     await mobile.waitForURL((u) => new URL(u).hash.startsWith('#/w01'))
     await mobile.getByText('今天先从哪件事开始？').waitFor()
     await mobile.goto(base + '#/w03')
+    await mobile.getByTestId('w03-committed-next').waitFor()
     const committed = await mobile.getByTestId('w03-committed-next').innerText()
     if (committed.includes(mark)) throw new Error(`${width} 现场草稿写入了纪要`)
+    if (committed !== '跟进采购窗口并确认需求数量（示例）') throw new Error(`${width} 已确认下一步被改成：${committed}`)
+    await mobile.evaluate((msg) => {
+      const bar = document.createElement('div')
+      bar.id = 'pr2-stamp'
+      bar.textContent = msg
+      bar.style.cssText = 'position:fixed;left:0;right:0;bottom:0;z-index:9999;background:#1d3b2e;color:#fff;font:600 12px/1.3 sans-serif;padding:6px 8px;text-align:center'
+      document.body.appendChild(bar)
+    }, `PR2 候选静态产物 · 不是当前线上版本 · 断言通过：已确认下一步仍是原文，不含「${mark}」`)
+    await mobile.screenshot({ path: `${out}/pr2-static/w03-after-${width}.png` })
     await mobile.close()
   }
 })

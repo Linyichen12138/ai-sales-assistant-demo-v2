@@ -35,18 +35,51 @@ export const UNANSWERED = [
   '新品试产交付周期',
 ] as const
 
+/** 金额用「万元的十分位」整数运算，避免 27.3 的二进制误差，也避免把 A、B 加总。 */
+const PRICE_D = 1350
+const MATERIAL_D = 780
+const LINE_D = { A: 273, B: 480 } as const
+
+export function wan(d: number) {
+  const n = d / 10
+  return `¥${Number.isInteger(n) ? String(n) : n.toFixed(1)} 万`
+}
+
+export function quoteOf(line: 'A' | 'B') {
+  const lineCost = LINE_D[line]
+  const cost = MATERIAL_D + lineCost
+  const profit = PRICE_D - cost
+  return {
+    line,
+    price: PRICE_D / 10,
+    material: MATERIAL_D / 10,
+    lineCost: lineCost / 10,
+    cost: cost / 10,
+    profit: profit / 10,
+    priceText: wan(PRICE_D),
+    materialText: wan(MATERIAL_D),
+    lineText: wan(lineCost),
+    costText: wan(cost),
+    profitText: wan(profit),
+    margin: line === 'A' ? '22%' : '6.67%',
+    term: '45 天',
+  }
+}
+
+const QA = quoteOf('A')
+const QB = quoteOf('B')
 export const HECHUAN_QUOTE = {
-  total: '¥135 万',
-  material: '¥78 万',
-  lineA: '¥27.3 万',
-  costA: '¥105.3 万',
-  profitA: '¥29.7 万',
-  marginA: '22%',
-  lineB: '¥48 万',
-  costB: '¥126 万',
-  profitB: '¥9 万',
-  marginB: '6.67%',
-  term: '45 天',
+  total: QA.priceText,
+  material: QA.materialText,
+  lineA: QA.lineText,
+  costA: QA.costText,
+  profitA: QA.profitText,
+  marginA: QA.margin,
+  lineB: QB.lineText,
+  costB: QB.costText,
+  profitB: QB.profitText,
+  marginB: QB.margin,
+  term: QA.term,
 } as const
 
 export const LEADS = [
@@ -63,7 +96,7 @@ export const DEFAULT_COMMITTED: Record<string, string> = {
   'w12.note': '按年采购 300 吨（示例）',
 }
 
-export type TaskGroup = 'doing' | 'pending' | 'done'
+export type TaskGroup = 'doing' | 'pending' | 'done' | 'archived'
 export interface DemoTask { id: string; title: string; group: TaskGroup; source: string }
 
 export const SEED_TASKS: DemoTask[] = [
@@ -77,5 +110,5 @@ export const SEED_TASKS: DemoTask[] = [
 ]
 
 export function openTaskCount(tasks: DemoTask[]) {
-  return tasks.filter((t) => t.group !== 'done').length
+  return tasks.filter((t) => t.group === 'doing' || t.group === 'pending').length
 }

@@ -14,7 +14,7 @@ const MODS: { key: ModKey; name: string; items: { id: string; label: string; to?
     { id: 'opp-xy', label: '鲜源连锁（示例公司）', tag: '签约·意向', to: '/w13' }] },
   { key: 'visit', name: '拜访', items: [
     { id: 'visit-week', label: '本周日程', to: '/w11', ico: 'cal' },
-    { id: 'visit-sample', label: '样品试吃安排', to: '/w11', ico: 'box' },
+    { id: 'visit-sample', label: '样品安排', to: '/w11', ico: 'box' },
     { id: 'visit-notes', label: '待写纪要', to: '/w03', badge: 2, ico: 'doc' }] },
   { key: 'quote', name: '报价与合同', items: [{ id: 'quote-sheet', label: '报价单', to: '/w12' }, { id: 'quote-contract', label: '合同审批', to: '/w04' }] },
   { key: 'pay', name: '履约与回款', items: [{ id: 'pay-deliver', label: '交付进度' }, { id: 'pay-pre', label: '打款前维护' }, { id: 'pay-remind', label: '回款提醒', to: '/w13' }] },
@@ -22,8 +22,8 @@ const MODS: { key: ModKey; name: string; items: { id: string; label: string; to?
 const SESSIONS = [
   { label: '禾川技术评估未答问题', scene: '复访准备', to: '/w02' },
   { label: '华粮年度报价测算', scene: '报价测算', to: '/w12' },
-  { label: '禾川正式合同审批', scene: '签约审批', to: '/w04' },
   { label: '禾川报价测算', scene: '报价测算', to: '/w17' },
+  { label: '禾川正式合同审批', scene: '签约审批', to: '/w04' },
 ]
 
 export function Sidebar({ conf, page }: { conf: SideConf; page: string }) {

@@ -33,9 +33,12 @@ npx tsc -p tsconfig.app.json --noEmit
 
 ```bash
 node scripts/wb-acceptance.mjs http://127.0.0.1:5173/
+node scripts/e2e-r3.mjs http://127.0.0.1:5173/
 ```
 
-覆盖路径 A–F、上下文隔离、未确认不写入、审批后态、任务回流、失败重试/转人工，以及 390px / 430px 现场记录。截图和 23 项矩阵在 `docs/acceptance-20261120/`。
+`wb-acceptance.mjs` 覆盖路径 A–F、上下文隔离、未确认不写入、审批后态、任务回流、失败重试/转人工，以及 390px / 430px 现场记录。截图和 23 项矩阵在 `docs/acceptance-20261120/`。
+
+`e2e-r3.mjs` 额外核对报价 A/B 互斥与精确金额、采纳/转商机/提交/转人工的不重复写入、刷新后仍保留示例进度、任务筛选与归档，以及 W03 的 2026 日期。示例进度存在本机 `ai-sales-demo-r3`，顶部「重置演示（示例）」会清空。
 
 ## 构建 Pages 产物
 
