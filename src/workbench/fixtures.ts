@@ -69,6 +69,13 @@ export interface DemoTask { id: string; title: string; group: TaskGroup; source:
 export const SEED_TASKS: DemoTask[] = [
   { id: 't-window', title: '跟进周敏确认采购窗口', group: 'doing', source: 'w09' },
   { id: 't-tech', title: '补发技术资料给刘峰（示例）', group: 'pending', source: 'w09' },
+  { id: 't-sign', title: '签约·正式合同待王磊审批（示例）', group: 'pending', source: 'w09' },
+  { id: 't-visit-hc', title: '10:00 禾川食品复访（示例）', group: 'doing', source: 'w09' },
+  { id: 't-visit-xy', title: '15:00 鲜源连锁初访（示例）', group: 'doing', source: 'w09' },
   { id: 't-hualiang-done', title: '华粮报价测算采纳', group: 'done', source: 'seed' },
   { id: 't-minutes', title: '禾川复访纪要已写', group: 'done', source: 'seed' },
 ]
+
+export function openTaskCount(tasks: DemoTask[]) {
+  return tasks.filter((t) => t.group !== 'done').length
+}

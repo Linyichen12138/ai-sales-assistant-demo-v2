@@ -49,6 +49,7 @@ interface WbState {
   holdSensitive: () => void
   askColleague: () => void
   addTask: (task: DemoTask) => void
+  completeTask: (id: string) => void
   setHualiangApproval: (v: boolean) => void
   setLinePick: (v: 'A' | 'B') => void
   resetDemo: () => void
@@ -106,6 +107,7 @@ export const useWb = create<WbState>((set) => ({
   holdSensitive: () => set({ sensitiveHeld: true }),
   askColleague: () => set({ colleagueAsked: true }),
   addTask: (task) => set((s) => (s.tasks.some((t) => t.id === task.id) ? {} : { tasks: [...s.tasks, task] })),
+  completeTask: (id) => set((s) => ({ tasks: s.tasks.map((t) => t.id === id ? { ...t, group: 'done' as const } : t) })),
   setHualiangApproval: (hualiangApproval) => set({ hualiangApproval }),
   setLinePick: (linePick) => set({ linePick }),
   resetDemo: () => set({

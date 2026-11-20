@@ -20,6 +20,7 @@ export function W06() {
     {xianyuan && <Card><h3>本次速记对象</h3><p data-testid="w06-xianyuan">鲜源连锁初访（示例）。不写入禾川未答问题，也不改禾川报价。</p></Card>}
     <label className="wb-field">现场要点（示例）<textarea data-testid="field-note" value={s.noteText} onChange={(e) => s.setNoteText(e.target.value)} placeholder="记录现场要点，可含口述要点（示例）" /></label>
     <div className="wb-acts-row">
+      <button className="wb-btn ghost" data-testid="voice-note" onClick={() => s.setNoteText(`${s.noteText}${s.noteText ? ' ' : ''}（语音示例）客户要看检测报告`)}>语音</button>
       <button className="wb-btn primary" data-testid="save-note" onClick={() => s.saveNote()}>保存速记</button>
       <button className="wb-btn ghost" data-testid="hold-sensitive" onClick={() => s.holdSensitive()}>敏感承诺转人工</button>
       <button className="wb-btn ghost" data-testid="ask-colleague" onClick={() => s.askColleague()}>问同事</button>
@@ -27,7 +28,7 @@ export function W06() {
     {s.noteSaved && <p className="wb-ok" data-testid="note-saved">草稿已保存（示例）。敏感承诺在确认前不会写入业务字段。</p>}
     {s.sensitiveHeld && <p data-testid="sensitive-held">敏感回答已转人工确认：价格承诺（示例）。未确认，不写入。</p>}
     {s.colleagueAsked && <p data-testid="colleague-asked">已向同事发起询问（示例），未写入业务字段。</p>}
-    <p className="wb-src">离线草稿 · {s.noteSaved ? '已保存 1 条（示例）' : '已保存 0 条（示例）'}</p>
+    <p className="wb-src" data-testid="draft-count">离线草稿 · 已保存 {s.noteSaved ? 3 : 2} 条（示例）</p>
     <button className="wb-btn primary block" data-testid="to-w07" onClick={() => nav('/w07')}>进入访后确认</button>
   </Phone>
 }
@@ -40,8 +41,8 @@ export function W07() {
   return <Phone testid="page-w07">
     <header className="wb-phone-bar"><button data-testid="w07-back" onClick={() => nav('/w01')}>＜ 返回工作台</button><b>访前准备 / 访后确认</b></header>
     <div className="wb-filters"><button className={tab === 'before' ? 'on' : ''} data-testid="tab-before" onClick={() => setTab('before')}>访前</button><button className={tab === 'after' ? 'on' : ''} data-testid="tab-after" onClick={() => setTab('after')}>访后确认</button></div>
-    <p>{xianyuan ? XIANYUAN.company : HECHUAN.company} · {xianyuan ? '联系人：门店经理（示例）' : '联系人：周敏（示例）'} · {tab === 'after' ? '访后' : '访前'}</p>
-    {tab === 'before' ? <Card><h3>访前重点（示例）</h3><ul className="wb-dots"><li>确认参会人与议题</li><li>敏感承诺不在现场写入</li></ul></Card> : <Card><h3>本次拜访摘要（示例数据）</h3><p>{xianyuan ? '门店补货节奏待确认（示例）。' : '客户认可继续技术评估，采购窗口仍待周敏确认（示例）。'}</p></Card>}
+    <p data-testid="w07-visit-type">{xianyuan ? XIANYUAN.company : HECHUAN.company} · 拜访类型：初访 · {xianyuan ? '联系人：门店经理（示例）' : '联系人：周敏（示例）'}</p>
+    {tab === 'before' ? <Card><h3>访前重点（示例）</h3><ul className="wb-dots"><li>确认参会人与议题</li><li>敏感承诺不在现场写入</li></ul></Card> : <Card><h3>本次拜访摘要（示例数据）</h3>{xianyuan ? <p>门店补货节奏待确认（示例）。</p> : <ul className="wb-dots"><li>与周敏（示例）、刘峰（示例）讨论了需求范围与交付节奏（示例）。</li><li>对方初步认可产品方案，采购窗口仍待确认（示例）。</li><li>会后由张帆（示例）向刘峰（示例）补发技术资料。</li></ul>}</Card>}
     {!xianyuan && <>
       <Card><h3>跟进周敏确认采购窗口</h3><Acts id="w07-window" fields={[{ key: 'w07.window', label: '跟进说明（示例）', initial: '确认采购窗口（示例）' }]} /></Card>
       <Card><h3>补发技术资料给刘峰</h3><Acts id="w07-tech" fields={[{ key: 'w07.tech', label: '资料说明（示例）', initial: '补发技术资料（示例）' }]} /></Card>
@@ -190,8 +191,8 @@ export function W19() {
       <p data-testid="contract-amount">合同金额 ¥135 万（示例）</p>
       <p className="wb-sub">{submitted ? '已由写入前 diff 确认提交（示例）。' : '示例：当前展示提交后进度，可从写入前 diff 确认提交后进入。'}</p>
       <ol className="wb-progress" data-testid="approval-progress">
-        <li data-state="done">1 提交 · 已完成</li>
-        <li data-state="done">2 销售经理 王磊（示例） · 已通过</li>
+        <li data-state="done">1 提交 · 已完成 · 10月20日（示例）</li>
+        <li data-state="done">2 销售经理 王磊（示例） · 已通过 · 10月21日（示例）</li>
         <li data-state="run">3 财务 陈静（示例） · 审核中</li>
         <li data-state="wait">4 盖章 法务 · 赵敏（示例） · 未开始</li>
       </ol>
@@ -304,6 +305,7 @@ export function W23() {
 export function W24() {
   const nav = useNavigate()
   const tasks = useWb((s) => s.tasks)
+  const completeTask = useWb((s) => s.completeTask)
   const groups: ['doing' | 'pending' | 'done', string][] = [['doing', '进行中'], ['pending', '待确认'], ['done', '已完成']]
   return <>
     <main className="wb-main" data-testid="page-w24">
@@ -312,6 +314,7 @@ export function W24() {
         {tasks.filter((t) => t.group === g).map((t) => <div key={t.id} className="wb-task" data-testid={`task-${t.id}`}>
           <button className="wb-textbtn" onClick={() => { if (g === 'pending') nav('/w21'); if (t.id === 't-xianyuan') nav('/w20') }}>{t.title}</button>
           <span className="wb-sub">{t.source === 'seed' ? '示例' : `来自 ${t.source}（示例）`}</span>
+          {g !== 'done' && <button className="wb-btn ghost sm" data-testid={`complete-${t.id}`} onClick={() => completeTask(t.id)}>完成</button>}
           {g === 'pending' && <Acts id={t.id} size="sm" fields={[{ key: `${t.id}.note`, label: '处理说明（示例）', initial: t.title }]} />}
         </div>)}
         {tasks.every((t) => t.group !== g) && <p className="wb-sub">暂无（示例）</p>}

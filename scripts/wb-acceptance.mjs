@@ -79,7 +79,8 @@ await check('A3', '转为商机离开线索', async () => {
 
 await check('A4', '能力中心进入 W16 再进入运行中', async () => {
   await page.getByRole('button', { name: '能力中心' }).click()
-  await hash('#/w10'); await has('能力中心')
+  await hash('#/w10'); await has('能力中心', '报价测算', '查看详情')
+  await shot('w10-capability-center')
   await page.getByTestId('skill-quote').click()
   await hash('#/w16'); await has('能力详情 / 报价测算', '查原料价', '比对生产线', '研判毛利与回款周期')
   await lacks('¥343.2 万')
@@ -122,7 +123,8 @@ await check('A7', '确认提交进入 W19', async () => {
 await check('A8', '鲜源逾期进入催收并回流任务', async () => {
   await page.locator('.wb-mod', { hasText: '履约与回款' }).click()
   await page.getByTestId('side-pay-remind').click()
-  await hash('#/w13'); await has('¥104 万', '¥20 万', '逾期 1 笔', '¥36 万', '¥48 万')
+  await hash('#/w13'); await has('回款预警', '¥104 万', '¥20 万', '逾期 1 笔', '¥36 万', '¥48 万')
+  await shot('w13-payment-warning')
   await page.getByTestId('pay-xianyuan').click()
   await hash('#/w20'); await has('鲜源连锁', '逾期 5 天', '¥36 万', '马丽', '今日 15:00', '确认鲜源付款计划并约定回款日')
   await lacks('禾川食品 · 正式合同')
@@ -226,7 +228,8 @@ await check('C4', '三态展开依据与部门', async () => {
 
 await check('D1', '开始初访进入现场速记', async () => {
   await page.goto(base + '#/w05')
-  await has('拜访 · 初访', '周敏')
+  await has('拜访 · 初访', '周敏', '开始初访')
+  await shot('w05-visit-prep')
   await page.getByTestId('start-visit').click()
   await hash('#/w06')
   await has('现场速记', '低钠配方稳定性检测报告', '批次留样与追溯流程', '新品试产交付周期')
@@ -320,6 +323,23 @@ await check('F3', '华粮编辑未确认不改说明', async () => {
 })
 
 const routes = ['/w01', '/w02', '/w03', '/w04', '/w05', '/w09', '/w10', '/w11', '/w12', '/w13']
+await check('N1', '今日任务角标随新增、完成和重置变化', async () => {
+  await page.getByTestId('reset-demo').click()
+  await hash('#/w01')
+  const read = async () => (await page.getByTestId('today-badge').innerText()).trim()
+  if (await read() !== '5') throw new Error('重置后角标应为 5，实际 ' + await read())
+  await page.goto(base + '#/w20')
+  await page.getByTestId('add-today').click()
+  if (await read() !== '6') throw new Error('加入任务后角标应为 6，实际 ' + await read())
+  await page.goto(base + '#/w24')
+  await page.getByTestId('complete-t-window').click()
+  if (await read() !== '5') throw new Error('完成后角标应为 5，实际 ' + await read())
+  await has('已完成', '跟进周敏确认采购窗口')
+  await page.getByTestId('reset-demo').click()
+  await hash('#/w01')
+  if (await read() !== '5') throw new Error('再次重置后角标应为 5，实际 ' + await read())
+})
+
 await check('R1', 'W01–W13 仍可达且无错误标签', async () => {
   for (const r of routes) {
     await page.goto(base + '#' + r)

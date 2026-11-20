@@ -94,7 +94,7 @@ export function W03() {
         <Msg who="ai"><p>我已整理本次复访的关键信息，请确认是否写入拜访纪要。</p></Msg>
         <div className="wb-msg ai"><span className="wb-ava-gap" /><table className="wb-table kv"><tbody>
           <tr><th>客户</th><td>禾川食品（示例公司）</td></tr><tr><th>拜访人</th><td>张帆（示例）</td></tr>
-          <tr><th>拜访时间</th><td>2026-11-03（示例）</td></tr>
+          <tr><th>拜访时间</th><td>2025-01-15（示例）</td></tr>
           <tr><th>沟通要点</th><td data-testid="w03-committed-points">{points}</td></tr>
           <tr><th>下一步</th><td data-testid="w03-committed-next">{next}</td></tr></tbody></table></div>
         <Msg who="me">采购窗口的时间我想再确认一下，先不写入。</Msg>
@@ -108,7 +108,7 @@ export function W03() {
         <h2>跟进周敏（示例）确认采购窗口</h2>
         <dl className="wb-kv">
           <dt>结论：</dt><dd>需与周敏（示例）确认采购窗口的具体时间。</dd>
-          <dt>依据：</dt><dd>本次复访中（2026-11-03，示例），客户表示采购计划预计在 3 月启动，仍需进一步确认。</dd>
+          <dt>依据：</dt><dd>本次复访中（2025-01-15，示例），客户表示采购计划预计在 3 月启动，仍需进一步确认。</dd>
           <dt>影响：</dt><dd>明确时间后可安排样品、报价及后续资源，避免进度迟误。</dd>
           <dt>下一步：</dt><dd>尽快联系周敏（示例），确认采购窗口时间。</dd>
           <dt>责任人：</dt><dd>张帆（示例）</dd><dt>权限：</dt><dd><b>可写入拜访纪要</b></dd></dl>
@@ -241,7 +241,7 @@ export function W10() {
   ]
   const shown = sk.filter((x) => f === '全部' || x[3] === f || (f === '签约' && x[3] === '报价与合同'))
   return <>
-    <main className="wb-main wide">
+    <main className="wb-main wide" data-testid="page-w10">
       <h1 className="wb-title">能力中心</h1><p className="wb-sub">销售场景技能 · 在对话中直接调用</p>
       <div className="wb-filters">{['全部', '商机', '拜访', '签约', '履约与回款'].map((x) => <button key={x} className={f === x ? 'on' : ''} onClick={() => setF(x)}>{x}</button>)}</div>
       <div className="wb-skill-cards">{shown.map(([n, t, dsc, st, to]) => <Card key={t} className="wb-sc"><h3><span className="wb-terra"><Ico n={n} s={20} /></span>{t}</h3><p>{dsc}</p><Pill tone="muted">{st}</Pill><button className="wb-btn primary sm" data-testid={t === '报价测算' ? 'skill-quote' : undefined} onClick={() => nav(to)}>{t === '报价测算' ? '查看详情' : '在对话中使用'}</button></Card>)}</div>

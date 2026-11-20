@@ -1,4 +1,5 @@
 import { useNavigate } from 'react-router-dom'
+import { openTaskCount } from './fixtures'
 import { useWb } from './store'
 import { ALogo, Ico } from './ui'
 
@@ -26,7 +27,7 @@ const SESSIONS = [
 ]
 
 export function Sidebar({ conf, page }: { conf: SideConf; page: string }) {
-  const nav = useNavigate(); const s = useWb()
+  const nav = useNavigate(); const s = useWb(); const todayCount = openTaskCount(s.tasks)
   const isOpen = (k: ModKey) => s.open[`${page}:${k}`] ?? conf.expand.includes(k)
   const go = (id: string, to?: string, label?: string) => {
     if (id === 'quote-sheet') { s.setQuoteSheet('hualiang'); nav('/w12'); return }
@@ -40,7 +41,7 @@ export function Sidebar({ conf, page }: { conf: SideConf; page: string }) {
     <div className="wb-brand"><ALogo size={26} /><b>AI 智能营销</b></div>
     <button className="wb-new" onClick={() => nav('/w01')}>＋ 新对话</button>
     <div className="wb-entries">
-      <button className={`wb-entry ${conf.sel === 'today' ? 'on' : ''}`} onClick={() => nav('/w09')}><Ico n="task" />今日任务<span className="wb-badge">5</span></button>
+      <button className={`wb-entry ${conf.sel === 'today' ? 'on' : ''}`} data-testid="nav-today" onClick={() => nav('/w09')}><Ico n="task" />今日任务<span className="wb-badge" data-testid="today-badge">{todayCount}</span></button>
       <button className={`wb-entry ${conf.sel === 'skills' ? 'on' : ''}`} onClick={() => nav('/w10')}><Ico n="layers" />能力中心</button>
     </div>
     <div className="wb-sep" />
