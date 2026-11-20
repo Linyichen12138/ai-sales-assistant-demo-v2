@@ -10,7 +10,7 @@ const CONF: Record<string, SideConf> = {
   '/w01': { expand: ['opp', 'visit'] },
   '/w02': { expand: ['opp'], sel: 'opp-hc', session: 1 },
   '/w03': { expand: ['visit'], sel: 'visit-notes' },
-  '/w04': { expand: ['quote'], sel: 'quote-contract', session: 3 },
+  '/w04': { expand: ['quote'], sel: 'quote-contract', session: 4 },
   '/w05': { expand: ['visit'], sel: 'visit-week' },
   '/w09': { expand: [], sel: 'today' },
   '/w10': { expand: [], sel: 'skills' },
@@ -22,13 +22,13 @@ const CONF: Record<string, SideConf> = {
   '/w14': { expand: ['lead'], sel: 'lead-new' },
   '/w15': { expand: ['lead'], sel: 'lead-new' },
   '/w16': { expand: [], sel: 'skills' },
-  '/w17': { expand: [], sel: 'skills', session: 4 },
-  '/w18': { expand: [], sel: 'skills', session: 4 },
-  '/w19': { expand: ['quote'], sel: 'quote-contract', session: 3 },
+  '/w17': { expand: [], session: 3 },
+  '/w18': { expand: [], session: 3 },
+  '/w19': { expand: ['quote'], sel: 'quote-contract', session: 4 },
   '/w20': { expand: ['pay'], sel: 'pay-remind' },
   '/w21': { expand: [], sel: 'today' },
-  '/w22': { expand: [], session: 4 },
-  '/w23': { expand: [], session: 4 },
+  '/w22': { expand: [], session: 3 },
+  '/w23': { expand: [], session: 3 },
   '/w24': { expand: [], sel: 'today' },
 }
 const PAGES: Record<string, () => ReactNode> = {
@@ -58,7 +58,7 @@ function Tour({ path }: { path: string }) {
       {st.links.length > 1 && st.links.map(([t, p]) => <button key={p} className={`wb-sub ${p === path ? 'on' : ''}`} onClick={() => { if (p === '/w12') useWb.getState().setQuoteSheet('hualiang'); nav(p) }}>{t}</button>)}
       {st.n < 7 && <em>→</em>}</span> })}
     <span className="wb-tour-tip">示例数据 · 不调用外部服务</span>
-    <button className="wb-btn ghost sm" data-testid="reset-demo" onClick={reset}>重置示例数据</button>
+    <button className="wb-btn ghost sm" data-testid="reset-demo" onClick={reset} title="清空本机保存的示例进度">重置演示（示例）</button>
   </nav>
 }
 
