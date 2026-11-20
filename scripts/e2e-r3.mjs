@@ -14,9 +14,15 @@ if (dirty) {
 
 const browser = await chromium.launch()
 const page = await browser.newPage({ viewport: { width: 1440, height: 900 } })
-const errs = []
-page.on('console', (m) => { if (m.type() === 'error') errs.push(m.text()) })
-page.on('pageerror', (e) => errs.push(String(e)))
+const buckets = { pageerror: [], consoleError: [], requestFailed: [], httpError: [] }
+function watch(p) {
+  p.on('pageerror', (e) => buckets.pageerror.push(String(e)))
+  p.on('console', (m) => { if (m.type() === 'error') buckets.consoleError.push(m.text()) })
+  p.on('requestfailed', (r) => buckets.requestFailed.push(`${r.failure()?.errorText || 'failed'} ${r.url()}`))
+  p.on('response', (r) => { if (r.status() >= 400) buckets.httpError.push(`${r.status()} ${r.url()}`) })
+}
+watch(page)
+const errs = buckets.consoleError
 const results = []
 const text = async () => (await page.locator('#root').innerText()).replace(/\s+/g, ' ')
 const has = async (...parts) => {
@@ -214,7 +220,7 @@ await check('P5', '确认驳回、r2 口径与窄屏', async () => {
   await page.goto(base + '#/w01')
   await has('今天先从哪件事开始？', '拜访 · 复访')
   const narrow = await browser.newPage({ viewport: { width: 800, height: 900 } })
-  narrow.on('pageerror', (e) => errs.push(String(e)))
+  watch(narrow)
   await narrow.goto(base + '#/w14')
   await narrow.getByTestId('page-w14').waitFor()
   const t = await narrow.locator('#root').innerText()
@@ -242,6 +248,7 @@ await page.getByTestId('pick-b').click()
 await page.screenshot({ path: `${out}/w18-line-b.png` })
 
 const failed = results.filter((r) => !r.ok)
-console.log(JSON.stringify({ passed: results.length - failed.length, failed: failed.length, results, consoleErrors: errs }, null, 2))
+console.log(JSON.stringify({ passed: results.length - failed.length, failed: failed.length, results, diagnostics: buckets }, null, 2))
 await browser.close()
-process.exit(failed.length || errs.length ? 1 : 0)
+const bad = buckets.pageerror.length + buckets.consoleError.length + buckets.requestFailed.length + buckets.httpError.length
+process.exit(failed.length || bad ? 1 : 0)

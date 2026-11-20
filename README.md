@@ -44,11 +44,10 @@ node scripts/e2e-r3.mjs http://127.0.0.1:5173/
 
 ```bash
 npm ci
-npm run build
-cp dist/index.html docs/index.html
+npm run build:pages
 ```
 
-`vite.config.ts` 使用 `base: './'` 和 `vite-plugin-singlefile`，脚本与样式内联进 `docs/index.html`。不要覆盖 `docs/v2-skeleton/`。
+`build:pages` 执行 `npm run build`，再把 `dist/index.html` 和 `dist/favicon.svg` 复制到 `docs/`。`vite.config.ts` 使用 `base: './'` 和 `vite-plugin-singlefile`，页面脚本与样式内联；图标是相对路径 `./favicon.svg`，跟站点目录走，不请求域名根路径。不要覆盖 `docs/v2-skeleton/`。
 
 静态复核：
 

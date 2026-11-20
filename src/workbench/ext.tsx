@@ -308,7 +308,7 @@ export function W19() {
       <p data-testid="contract-name">禾川食品 · 正式合同（示例）</p>
       <p data-testid="contract-amount">合同金额 ¥135 万（示例）</p>
       <p className="wb-sub">{submitted ? '已由写入前 diff 确认提交（示例）。' : '示例：当前展示提交后进度，可从写入前 diff 确认提交后进入。'}</p>
-      <ol className="wb-stepper" data-testid="approval-progress">
+<ol className="wb-stepper" data-testid="approval-progress">
         {nodes.map((n, i) => <li key={n.key} data-state={n.state}><i>{n.state === 'done' ? '✓' : i + 1}</i><b>{n.title}</b><span>{n.who}</span><em>{n.st}</em></li>)}
       </ol>
       {step < 2 && <p className="wb-gap" data-testid="approval-gap">{step === 0 ? '还差「财务·陈静（示例）」「法务·赵敏（示例）」盖章。' : '还差「法务·赵敏（示例）」盖章。'}</p>}
@@ -367,9 +367,9 @@ export function W20() {
 }
 
 const W21_CARDS = [
-  { id: 'infer', kind: '推断', title: '补发技术资料给刘峰（示例）', basis: '依据：技术评估未答问题（示例）', dept: '需确认部门：研发部（示例）' },
-  { id: 'fact', kind: '事实', title: '跟进周敏（示例）确认采购窗口', basis: '依据：展会纪要与邮件确认（示例）', dept: '需确认部门：技术部（示例）' },
-  { id: 'approve', kind: '待审批', title: '签约·正式合同 待王磊（示例）审批', basis: '依据：正式合同变更（示例）', dept: '需确认部门：组长（示例）' },
+  { id: 'infer', kind: '推断', title: '补发技术资料给刘峰（示例）', basis: '依据：复访纪要里刘峰的技术评估仍有 3 项未答（示例）', extra: '不确定性：检测报告、留样追溯和试产周期是否都要补发，尚未与刘峰确认（示例）' },
+  { id: 'fact', kind: '事实', title: '跟进周敏（示例）确认采购窗口', basis: '依据：展会纪要与邮件确认（示例）', extra: '需确认部门：技术部（示例）' },
+  { id: 'approve', kind: '待审批', title: '签约·正式合同 待王磊（示例）审批', basis: '依据：禾川报价测算口径为 ¥135 万，尚未提交组长审批（示例）', extra: '不确定性：王磊确认前，正式合同不会写入（示例）' },
 ] as const
 
 export function W21() {
@@ -378,12 +378,12 @@ export function W21() {
   return <>
     <main className="wb-main" data-testid="page-w21">
       <div className="wb-cal-head"><h1 className="wb-title">今日任务</h1><button className="wb-btn ghost" onClick={() => nav('/w09')}>返回今日任务</button></div>
-      {W21_CARDS.map((c) => { const on = open === c.id; return <Card key={c.id} data-testid={`w21-${c.id}`} className={`wb-acard ${c.kind === '事实' ? 'fact' : c.kind === '待审批' ? 'approve' : 'infer'} ${on ? 'open' : ''}`}>
+{W21_CARDS.map((c) => { const on = open === c.id; return <Card key={c.id} data-testid={`w21-${c.id}`} className={`wb-acard ${c.kind === '事实' ? 'fact' : c.kind === '待审批' ? 'approve' : 'infer'} ${on ? 'open' : ''}`}>
         <div className="wb-acard-h">
           <button className="wb-textbtn" data-testid={`w21-toggle-${c.id}`} onClick={() => setOpen(on ? '' : c.id)}>{on ? '▾' : '▸'} <span className={`wb-kind ${c.kind === '事实' ? 'fact' : c.kind === '待审批' ? 'approve' : ''}`}>{c.kind}</span> {c.title}</button>
           <Acts id={`w21-${c.id}`} size="sm" note={false} fields={[{ key: `w21.${c.id}`, label: '行动说明（示例）', initial: c.title }]} />
         </div>
-        {on && <div data-testid={c.id === 'fact' ? 'w21-basis' : undefined} className="wb-basis"><p>{c.basis}</p><p>{c.dept}</p></div>}
+        {on && <div data-testid={c.id === 'fact' ? 'w21-basis' : `w21-basis-${c.id}`} className="wb-basis"><p>{c.basis}</p><p>{c.extra}</p></div>}
       </Card> })}
     </main>
     <aside className="wb-right">

@@ -7,17 +7,24 @@ const out = 'docs/acceptance-20261120'
 await mkdir(out, { recursive: true })
 const browser = await chromium.launch()
 const page = await browser.newPage({ viewport: { width: 1440, height: 900 } })
-const errs = []
-page.on('console', (m) => { if (m.type() === 'error') errs.push(m.text()) })
-page.on('pageerror', (e) => errs.push(String(e)))
+const buckets = { pageerror: [], consoleError: [], requestFailed: [], httpError: [] }
+function watch(p) {
+  p.on('pageerror', (e) => buckets.pageerror.push(String(e)))
+  p.on('console', (m) => { if (m.type() === 'error') buckets.consoleError.push(m.text()) })
+  p.on('requestfailed', (r) => buckets.requestFailed.push(`${r.failure()?.errorText || 'failed'} ${r.url()}`))
+  p.on('response', (r) => { if (r.status() >= 400) buckets.httpError.push(`${r.status()} ${r.url()}`) })
+}
+watch(page)
 const results = []
 async function text() { return (await page.locator('#root').innerText()).replace(/\s+/g, ' ') }
 async function shot(name) { await page.screenshot({ path: `${out}/${name}.png` }) }
 async function check(id, name, fn) {
-  const e0 = errs.length
+  const c0 = buckets.consoleError.length
+  const p0 = buckets.pageerror.length
   try {
     await fn()
-    if (errs.length > e0) throw new Error('控制台报错: ' + errs.slice(e0).join(' | '))
+    const fresh = [...buckets.consoleError.slice(c0), ...buckets.pageerror.slice(p0)]
+    if (fresh.length) throw new Error('控制台或 pageerror: ' + fresh.join(' | '))
     results.push({ id, name, ok: true })
     console.log('PASS', id, name)
   } catch (e) {
@@ -117,6 +124,8 @@ await check('A7', '确认提交进入 W19', async () => {
   await page.getByTestId('w04-commit').click()
   await hash('#/w19')
   await has('禾川食品 · 正式合同', '¥135 万', '王磊', '已通过', '陈静', '审核中', '赵敏', '未开始', '还差')
+  const prog = (await page.getByTestId('approval-progress').innerText()).replace(/\d{1,2}月\d{1,2}日/g, '')
+  if (/\d+\s*[.、)]\s*\d+/.test(prog)) throw new Error('W19 步骤编号重复: ' + prog)
   await shot('a-w19-progress')
 })
 
@@ -223,14 +232,61 @@ await check('C4', '三态展开依据与部门', async () => {
   await page.goto(base + '#/w09')
   await page.getByTestId('w09-open-w09-window').click()
   await hash('#/w21'); await has('推断', '事实', '待审批', '依据：展会纪要与邮件确认（示例）', '需确认部门：技术部（示例）')
+  await page.getByTestId('w21-toggle-infer').click()
+  await has('依据：复访纪要里刘峰的技术评估仍有 3 项未答（示例）', '不确定性：检测报告、留样追溯和试产周期是否都要补发，尚未与刘峰确认（示例）')
+  await lacks('依据：展会纪要与邮件确认（示例）')
+  await page.getByTestId('w21-toggle-approve').click()
+  await has('依据：禾川报价测算口径为 ¥135 万，尚未提交组长审批（示例）', '不确定性：王磊确认前，正式合同不会写入（示例）')
+  await lacks('复访纪要里刘峰')
   await shot('c-w21-states')
+})
+
+await check('C5', '取消编辑并跨页丢弃未确认草稿', async () => {
+  await page.getByTestId('reset-demo').click()
+  await page.goto(base + '#/w03')
+  const before = await page.getByTestId('w03-committed-next').innerText()
+  await page.getByTestId('w03-edit').click()
+  await page.getByTestId('field-w03.next').fill('临时草稿应被取消')
+  await page.getByTestId('w03-cancel').click()
+  if (await page.getByTestId('edit-form-w03').count()) throw new Error('取消后仍在编辑')
+  const after = await page.getByTestId('w03-committed-next').innerText()
+  if (after !== before || after.includes('临时草稿应被取消')) throw new Error('取消写入了纪要')
+  await page.getByTestId('w03-edit').click()
+  const again = await page.getByTestId('field-w03.next').inputValue()
+  if (again !== before) throw new Error('重新编辑仍残留草稿: ' + again)
+  await page.getByTestId('field-w03.next').fill('跨页草稿应丢弃')
+  await page.goto(base + '#/w01')
+  await page.goto(base + '#/w03')
+  if (await page.getByTestId('edit-form-w03').count()) throw new Error('跨页返回仍停留编辑')
+  if ((await page.getByTestId('w03-committed-next').innerText()).includes('跨页草稿应丢弃')) throw new Error('跨页后只读内容被改')
+  await page.getByTestId('w03-edit').click()
+  if ((await page.getByTestId('field-w03.next').inputValue()).includes('跨页草稿应丢弃')) throw new Error('跨页后草稿残留')
+  await page.getByTestId('w03-cancel').click()
+  await page.goto(base + '#/w12')
+  const note = await page.getByTestId('w12-committed-note').innerText()
+  await page.getByTestId('edit-w12-quote').click()
+  await page.getByTestId('field-w12.note').fill('华粮临时草稿')
+  await page.getByTestId('cancel-w12-quote').click()
+  if (await page.getByTestId('edit-form-w12-quote').count()) throw new Error('华粮取消后仍在编辑')
+  const note2 = await page.getByTestId('w12-committed-note').innerText()
+  if (note2 !== note || note2.includes('华粮临时草稿')) throw new Error('华粮取消写入了说明')
+  await page.getByTestId('edit-w12-quote').click()
+  if ((await page.getByTestId('field-w12.note').inputValue()).includes('华粮临时草稿')) throw new Error('华粮重新编辑残留')
+  await page.getByTestId('field-w12.note').fill('华粮跨页草稿')
+  await page.goto(base + '#/w01')
+  await page.goto(base + '#/w12')
+  if (await page.getByTestId('edit-form-w12-quote').count()) throw new Error('华粮跨页仍在编辑')
+  const note3 = await page.getByTestId('w12-committed-note').innerText()
+  if (note3.includes('华粮跨页草稿')) throw new Error('华粮跨页写入了说明')
+  await page.getByTestId('edit-w12-quote').click()
+  if ((await page.getByTestId('field-w12.note').inputValue()).includes('华粮跨页草稿')) throw new Error('华粮跨页草稿残留')
 })
 
 await check('D1', '开始初访进入现场速记', async () => {
   await page.goto(base + '#/w05')
   await has('拜访 · 初访', '周敏', '开始初访')
   await shot('w05-visit-prep')
-  await page.getByTestId('start-visit').click()
+  await page.getByTestId('start-visit').filter({ visible: true }).click()
   await hash('#/w06')
   await has('现场速记', '低钠配方稳定性检测报告', '批次留样与追溯流程', '新品试产交付周期')
   await page.getByTestId('field-note').fill('现场：客户要看检测报告（示例）')
@@ -248,24 +304,71 @@ await check('D1', '开始初访进入现场速记', async () => {
   await hash('#/w01'); await has('今天先从哪件事开始？', '禾川食品')
 })
 
-await check('D2', '移动宽度现场记录', async () => {
-  const mobile = await browser.newPage({ viewport: { width: 390, height: 844 } })
-  mobile.on('pageerror', (e) => errs.push(String(e)))
-  await mobile.goto(base + '#/w06')
-  await mobile.getByTestId('page-w06').waitFor()
-  const t = (await mobile.locator('#root').innerText()).replace(/\s+/g, ' ')
-  for (const p of ['现场速记', '低钠配方稳定性检测报告', '批次留样与追溯流程', '新品试产交付周期']) if (!t.includes(p)) throw new Error(`移动页缺少「${p}」`)
-  await mobile.screenshot({ path: `${out}/d-w06-mobile-390.png` })
-  await mobile.goto(base + '#/w07')
-  await mobile.getByTestId('page-w07').waitFor()
-  await mobile.screenshot({ path: `${out}/d-w07-mobile-390.png` })
-  const wide = await mobile.evaluate(() => document.querySelector('.wb-side')?.getBoundingClientRect().width ?? 0)
-  if (wide > 0) throw new Error('390px 下侧栏仍占宽')
-  await mobile.setViewportSize({ width: 430, height: 900 })
-  await mobile.goto(base + '#/w06')
-  await mobile.getByTestId('page-w06').waitFor()
-  await mobile.screenshot({ path: `${out}/d-w06-mobile-430.png` })
-  await mobile.close()
+await check('D2', '窄屏从 W05 开始初访走到 W07 再返回', async () => {
+  await mkdir(`${out}/pr2-static`, { recursive: true })
+  const stamp = async (p) => p.evaluate(() => {
+    document.getElementById('pr2-stamp')?.remove()
+    const bar = document.createElement('div')
+    bar.id = 'pr2-stamp'
+    bar.textContent = 'PR2 候选静态产物 · 不是当前线上版本'
+    bar.style.cssText = 'position:fixed;left:0;right:0;bottom:0;z-index:9999;background:#B75A3B;color:#fff;font:600 12px/1.3 sans-serif;padding:6px 8px;text-align:center'
+    document.body.appendChild(bar)
+  })
+  for (const [width, height] of [[390, 844], [430, 900]]) {
+    const mobile = await browser.newPage({ viewport: { width, height } })
+    watch(mobile)
+    const mark = `${width}窄屏现场草稿不写入`
+    await mobile.goto(base + '#/w05')
+    await mobile.getByTestId('page-w05').waitFor()
+    const start = mobile.getByTestId('start-visit').filter({ visible: true })
+    if (await start.count() !== 1) throw new Error(`${width} 可见的开始初访不是 1 个`)
+    const side = await mobile.evaluate(() => document.querySelector('.wb-side')?.getBoundingClientRect().width ?? 0)
+    if (side > 0) throw new Error(`${width} 侧栏仍占宽`)
+    await stamp(mobile)
+    await mobile.screenshot({ path: `${out}/pr2-static/w05-${width}.png` })
+    await mobile.locator('#pr2-stamp').evaluate((el) => el.remove())
+    await start.click()
+    await mobile.waitForURL((u) => new URL(u).hash.startsWith('#/w06'))
+    await mobile.getByTestId('page-w06').waitFor()
+    const w06 = (await mobile.locator('#root').innerText()).replace(/\s+/g, ' ')
+    for (const s of ['现场速记', '拜访 · 初访', '低钠配方稳定性检测报告', '批次留样与追溯流程', '新品试产交付周期']) {
+      if (!w06.includes(s)) throw new Error(`${width} W06 缺少「${s}」`)
+    }
+    await mobile.getByTestId('field-note').fill(mark)
+    await mobile.getByTestId('save-note').click()
+    await mobile.getByText('草稿已保存').waitFor()
+    await stamp(mobile)
+    await mobile.screenshot({ path: `${out}/pr2-static/w06-${width}.png` })
+    await mobile.locator('#pr2-stamp').evaluate((el) => el.remove())
+    await mobile.getByTestId('to-w07').click()
+    await mobile.waitForURL((u) => new URL(u).hash.startsWith('#/w07'))
+    await mobile.getByTestId('page-w07').waitFor()
+    const w07 = (await mobile.locator('#root').innerText()).replace(/\s+/g, ' ')
+    for (const s of ['访前准备 / 访后确认', '周敏', '未经确认不会写入', '完成并返回工作台']) {
+      if (!w07.includes(s)) throw new Error(`${width} W07 缺少「${s}」`)
+    }
+    if (w07.includes('已写入拜访纪要')) throw new Error(`${width} 未确认却显示已写入`)
+    await stamp(mobile)
+    await mobile.screenshot({ path: `${out}/pr2-static/w07-${width}.png` })
+    await mobile.locator('#pr2-stamp').evaluate((el) => el.remove())
+    await mobile.getByTestId('finish-visit').click()
+    await mobile.waitForURL((u) => new URL(u).hash.startsWith('#/w01'))
+    await mobile.getByText('今天先从哪件事开始？').waitFor()
+    await mobile.goto(base + '#/w03')
+    await mobile.getByTestId('w03-committed-next').waitFor()
+    const committed = await mobile.getByTestId('w03-committed-next').innerText()
+    if (committed.includes(mark)) throw new Error(`${width} 现场草稿写入了纪要`)
+    if (committed !== '跟进采购窗口并确认需求数量（示例）') throw new Error(`${width} 已确认下一步被改成：${committed}`)
+    await mobile.evaluate((msg) => {
+      const bar = document.createElement('div')
+      bar.id = 'pr2-stamp'
+      bar.textContent = msg
+      bar.style.cssText = 'position:fixed;left:0;right:0;bottom:0;z-index:9999;background:#1d3b2e;color:#fff;font:600 12px/1.3 sans-serif;padding:6px 8px;text-align:center'
+      document.body.appendChild(bar)
+    }, `PR2 候选静态产物 · 不是当前线上版本 · 断言通过：已确认下一步仍是原文，不含「${mark}」`)
+    await mobile.screenshot({ path: `${out}/pr2-static/w03-after-${width}.png` })
+    await mobile.close()
+  }
 })
 
 await check('E1', '任务中心看到催收与转人工并可回三态', async () => {
@@ -354,6 +457,12 @@ await check('R1', 'W01–W13 仍可达且无错误标签', async () => {
 })
 
 const failed = results.filter((r) => !r.ok)
-console.log(JSON.stringify({ passed: results.length - failed.length, failed: failed.length, results, consoleErrors: errs }, null, 2))
+const diagnostics = {
+  pageerror: buckets.pageerror,
+  consoleError: buckets.consoleError,
+  requestFailed: buckets.requestFailed,
+  httpError: buckets.httpError,
+}
+console.log(JSON.stringify({ passed: results.length - failed.length, failed: failed.length, results, diagnostics }, null, 2))
 await browser.close()
-process.exit(failed.length ? 1 : 0)
+process.exit(failed.length || diagnostics.pageerror.length || diagnostics.consoleError.length || diagnostics.requestFailed.length || diagnostics.httpError.length ? 1 : 0)
