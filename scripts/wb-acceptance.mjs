@@ -286,7 +286,7 @@ await check('D1', '开始初访进入现场速记', async () => {
   await page.goto(base + '#/w05')
   await has('拜访 · 初访', '周敏', '开始初访')
   await shot('w05-visit-prep')
-  await page.getByTestId('start-visit').click()
+  await page.getByTestId('start-visit').filter({ visible: true }).click()
   await hash('#/w06')
   await has('现场速记', '低钠配方稳定性检测报告', '批次留样与追溯流程', '新品试产交付周期')
   await page.getByTestId('field-note').fill('现场：客户要看检测报告（示例）')
@@ -304,24 +304,61 @@ await check('D1', '开始初访进入现场速记', async () => {
   await hash('#/w01'); await has('今天先从哪件事开始？', '禾川食品')
 })
 
-await check('D2', '移动宽度现场记录', async () => {
-  const mobile = await browser.newPage({ viewport: { width: 390, height: 844 } })
-  watch(mobile)
-  await mobile.goto(base + '#/w06')
-  await mobile.getByTestId('page-w06').waitFor()
-  const t = (await mobile.locator('#root').innerText()).replace(/\s+/g, ' ')
-  for (const p of ['现场速记', '低钠配方稳定性检测报告', '批次留样与追溯流程', '新品试产交付周期']) if (!t.includes(p)) throw new Error(`移动页缺少「${p}」`)
-  await mobile.screenshot({ path: `${out}/d-w06-mobile-390.png` })
-  await mobile.goto(base + '#/w07')
-  await mobile.getByTestId('page-w07').waitFor()
-  await mobile.screenshot({ path: `${out}/d-w07-mobile-390.png` })
-  const wide = await mobile.evaluate(() => document.querySelector('.wb-side')?.getBoundingClientRect().width ?? 0)
-  if (wide > 0) throw new Error('390px 下侧栏仍占宽')
-  await mobile.setViewportSize({ width: 430, height: 900 })
-  await mobile.goto(base + '#/w06')
-  await mobile.getByTestId('page-w06').waitFor()
-  await mobile.screenshot({ path: `${out}/d-w06-mobile-430.png` })
-  await mobile.close()
+await check('D2', '窄屏从 W05 开始初访走到 W07 再返回', async () => {
+  await mkdir(`${out}/pr2-static`, { recursive: true })
+  const stamp = async (p) => p.evaluate(() => {
+    document.getElementById('pr2-stamp')?.remove()
+    const bar = document.createElement('div')
+    bar.id = 'pr2-stamp'
+    bar.textContent = 'PR2 候选静态产物 · 不是当前线上版本'
+    bar.style.cssText = 'position:fixed;left:0;right:0;bottom:0;z-index:9999;background:#B75A3B;color:#fff;font:600 12px/1.3 sans-serif;padding:6px 8px;text-align:center'
+    document.body.appendChild(bar)
+  })
+  for (const [width, height] of [[390, 844], [430, 900]]) {
+    const mobile = await browser.newPage({ viewport: { width, height } })
+    watch(mobile)
+    const mark = `${width}窄屏现场草稿不写入`
+    await mobile.goto(base + '#/w05')
+    await mobile.getByTestId('page-w05').waitFor()
+    const start = mobile.getByTestId('start-visit').filter({ visible: true })
+    if (await start.count() !== 1) throw new Error(`${width} 可见的开始初访不是 1 个`)
+    const side = await mobile.evaluate(() => document.querySelector('.wb-side')?.getBoundingClientRect().width ?? 0)
+    if (side > 0) throw new Error(`${width} 侧栏仍占宽`)
+    await stamp(mobile)
+    await mobile.screenshot({ path: `${out}/pr2-static/w05-${width}.png` })
+    await mobile.locator('#pr2-stamp').evaluate((el) => el.remove())
+    await start.click()
+    await mobile.waitForURL((u) => new URL(u).hash.startsWith('#/w06'))
+    await mobile.getByTestId('page-w06').waitFor()
+    const w06 = (await mobile.locator('#root').innerText()).replace(/\s+/g, ' ')
+    for (const s of ['现场速记', '拜访 · 初访', '低钠配方稳定性检测报告', '批次留样与追溯流程', '新品试产交付周期']) {
+      if (!w06.includes(s)) throw new Error(`${width} W06 缺少「${s}」`)
+    }
+    await mobile.getByTestId('field-note').fill(mark)
+    await mobile.getByTestId('save-note').click()
+    await mobile.getByText('草稿已保存').waitFor()
+    await stamp(mobile)
+    await mobile.screenshot({ path: `${out}/pr2-static/w06-${width}.png` })
+    await mobile.locator('#pr2-stamp').evaluate((el) => el.remove())
+    await mobile.getByTestId('to-w07').click()
+    await mobile.waitForURL((u) => new URL(u).hash.startsWith('#/w07'))
+    await mobile.getByTestId('page-w07').waitFor()
+    const w07 = (await mobile.locator('#root').innerText()).replace(/\s+/g, ' ')
+    for (const s of ['访前准备 / 访后确认', '周敏', '未经确认不会写入', '完成并返回工作台']) {
+      if (!w07.includes(s)) throw new Error(`${width} W07 缺少「${s}」`)
+    }
+    if (w07.includes('已写入拜访纪要')) throw new Error(`${width} 未确认却显示已写入`)
+    await stamp(mobile)
+    await mobile.screenshot({ path: `${out}/pr2-static/w07-${width}.png` })
+    await mobile.locator('#pr2-stamp').evaluate((el) => el.remove())
+    await mobile.getByTestId('finish-visit').click()
+    await mobile.waitForURL((u) => new URL(u).hash.startsWith('#/w01'))
+    await mobile.getByText('今天先从哪件事开始？').waitFor()
+    await mobile.goto(base + '#/w03')
+    const committed = await mobile.getByTestId('w03-committed-next').innerText()
+    if (committed.includes(mark)) throw new Error(`${width} 现场草稿写入了纪要`)
+    await mobile.close()
+  }
 })
 
 await check('E1', '任务中心看到催收与转人工并可回三态', async () => {

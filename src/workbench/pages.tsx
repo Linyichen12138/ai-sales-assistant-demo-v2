@@ -203,6 +203,12 @@ export function W05() {
       <Ctx text={opp} pill="拜访 · 初访" />
       <Msg who="ai">已为初访准备好目标与提示。对象：{who}</Msg>
       {items.map(([n, t, dsc], i) => <Card key={t} className="wb-prep"><span className="wb-prep-ico"><Ico n={n} s={26} /></span><div><h3>{t}</h3><p>{dsc}</p></div><Acts id={`w05-${target}-${i}`} size="sm" fields={[{ key: `w05.${target}.${i}`, label: `${t}备注（示例）`, initial: dsc }]} /></Card>)}
+      <Card className="wb-narrow-start">
+        <h3>选择联系人</h3>
+        {people.map((p, i) => <button key={p} className={`wb-radio ${c === i ? 'on' : ''}`} onClick={() => setC(i)}><i />{p}</button>)}
+        <button className="wb-btn primary block" data-testid="start-visit" onClick={() => nav('/w06')}>开始初访</button>
+        <p className="wb-note center">进入现场速记。窄屏不依赖右栏。</p>
+      </Card>
     </main>
     <aside className="wb-right">
       <Card><h3>当前对象</h3><div className="wb-obj" data-testid="w05-object"><Ico n="building" s={20} />{who}</div></Card>
