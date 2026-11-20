@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react'
+import { useState, type ReactNode } from 'react'
 import { useWb, type Decision } from './store'
 
 export function ALogo({ size = 26 }: { size?: number }) {
@@ -33,19 +33,45 @@ export function Ico({ n, s = 16 }: { n: string; s?: number }) {
 export function Pill({ children, tone = 'terra' }: { children: ReactNode; tone?: 'terra' | 'coral' | 'ok' | 'risk' | 'muted' }) { return <span className={`wb-pill ${tone}`}>{children}</span> }
 export function Card({ children, className = '' }: { children: ReactNode; className?: string }) { return <section className={`wb-card ${className}`}>{children}</section> }
 
-/** 行动卡按钮组：确认写入 / 编辑 / 驳回；未经确认不会写入 */
-export function Acts({ id, size = 'md', note = true, onConfirm, doneText = '已写入（示例）', confirmLabel = '确认写入' }: { id: string; size?: 'sm' | 'md' | 'lg'; note?: boolean; onConfirm?: () => boolean | void; doneText?: string; confirmLabel?: string }) {
+export interface ActField { key: string; label: string; initial: string }
+
+/** 行动卡：确认写入 / 可编辑字段 / 驳回必填理由。草稿在确认前不进入 committed。 */
+export function Acts({ id, size = 'md', note = true, onConfirm, doneText = '已写入（示例）', confirmLabel = '确认写入', fields }: { id: string; size?: 'sm' | 'md' | 'lg'; note?: boolean; onConfirm?: () => boolean | void; doneText?: string; confirmLabel?: string; fields?: ActField[] }) {
   const s = useWb(); const d: Decision = s.decisions[id] ?? '待确认'
-  if (d === '已写入' || d === '已驳回') return <div className={`wb-acts done ${size}`}>
-    <span className={d === '已写入' ? 'wb-ok' : 'wb-rej'}>{d === '已写入' ? `✓ ${doneText}` : '✕ 已驳回，未写入'}</span>
+  const [rejecting, setRejecting] = useState(false)
+  const reason = s.reasons[id] ?? ''
+  const form: ActField[] = fields?.length ? fields : [{ key: `${id}.note`, label: '行动说明（示例）', initial: '' }]
+  const beginEdit = () => {
+    const st = useWb.getState()
+    for (const f of form) if (st.drafts[f.key] === undefined) st.setDraft(f.key, st.committed[f.key] ?? f.initial)
+    st.setDecision(id, '编辑中')
+    setRejecting(false)
+  }
+  if (d === '已写入' || d === '已驳回') return <div className={`wb-acts done ${size}`} data-testid={`acts-${id}`}>
+    <span className={d === '已写入' ? 'wb-ok' : 'wb-rej'}>{d === '已写入' ? `✓ ${doneText}` : `✕ 已驳回，未写入${reason ? `：${reason}` : ''}`}</span>
     <button className="wb-btn ghost sm" onClick={() => s.setDecision(id, '待确认')}>撤销</button>
   </div>
-  return <div className={`wb-acts ${size}`}>
+  return <div className={`wb-acts ${size}`} data-testid={`acts-${id}`}>
+    {d === '编辑中' && <div className="wb-edit" data-testid={`edit-form-${id}`}>
+      {form.map((f) => <label key={f.key} className="wb-field">{f.label}
+        <input data-testid={`field-${f.key}`} value={s.drafts[f.key] ?? ''} onChange={(e) => s.setDraft(f.key, e.target.value)} />
+      </label>)}
+      <small className="wb-note">编辑中 · 未经确认不会写入</small>
+    </div>}
+    {rejecting && <div className="wb-reject" data-testid={`reject-form-${id}`}>
+      <label className="wb-field">驳回原因（必填）
+        <textarea data-testid={`reason-${id}`} value={reason} onChange={(e) => s.setReason(id, e.target.value)} placeholder="请填写驳回原因（示例）" />
+      </label>
+      <div className="wb-acts-row">
+        <button className="wb-btn primary" data-testid={`reject-submit-${id}`} disabled={!reason.trim()} onClick={() => { s.setDecision(id, '已驳回'); setRejecting(false) }}>提交驳回</button>
+        {!reason.trim() && <span className="wb-err">填写原因后才能提交</span>}
+      </div>
+    </div>}
     <div className="wb-acts-row">
-      <button className="wb-btn primary" onClick={() => { if (onConfirm && onConfirm() === false) return; s.setDecision(id, '已写入'); s.notify(`已确认写入：${doneText}`) }}>{confirmLabel}</button>
-      <button className={`wb-btn ghost ${d === '编辑中' ? 'on' : ''}`} onClick={() => { s.setDecision(id, d === '编辑中' ? '待确认' : '编辑中'); s.notify('已进入编辑（示例），修改后再确认写入') }}>编辑</button>
-      <button className="wb-btn danger" onClick={() => { s.setDecision(id, '已驳回'); s.notify('已驳回，不会写入') }}>驳回</button>
+      <button className="wb-btn primary" data-testid={`confirm-${id}`} onClick={() => { if (onConfirm && onConfirm() === false) return; if (d === '编辑中') s.confirmFields(form.map((f) => f.key)); s.setDecision(id, '已写入') }}>{confirmLabel}</button>
+      <button className={`wb-btn ghost ${d === '编辑中' ? 'on' : ''}`} data-testid={`edit-${id}`} onClick={beginEdit}>编辑</button>
+      <button className="wb-btn danger" data-testid={`reject-${id}`} onClick={() => { setRejecting(true); s.setDecision(id, '待确认') }}>驳回</button>
     </div>
-    {note && <small className="wb-note">{d === '编辑中' ? '编辑中 · 未经确认不会写入' : '未经确认不会写入'}</small>}
+    {note && d !== '编辑中' && !rejecting && <small className="wb-note">未经确认不会写入</small>}
   </div>
 }
