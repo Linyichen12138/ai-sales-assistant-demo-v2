@@ -12,7 +12,7 @@
 |---|---|---|---|---|---|
 | W01 | `#/w01` | 四张技能卡、待确认行动、风险 | 停在禾川 · 拜访·复访 | [w01-workbench.png](w01-workbench.png) | 三栏、对象、技能卡、三条待确认和「停滞 9 天」与终稿一致。顶部演示导览是原工作台的示例导航，终稿没有，保留。 |
 | W02 | 最近会话；W15 转为商机 | 3 项未答；行动卡 | 离开线索后金额 ¥135 万 / 300 吨 | [a-w02-converted.png](a-w02-converted.png) | 未答三项、依据、联系人和金额与终稿一致。 |
-| W03 | `#/w03`、待写纪要 | 编辑字段；未确认不写；驳回必填 | 确认后纪要才变 | [c-w03-edit-uncommitted.png](c-w03-edit-uncommitted.png)、[c-w03-rejected.png](c-w03-rejected.png)、[c-w03-committed.png](c-w03-committed.png) | 结论到权限、确认/编辑/驳回与终稿一致。拜访时间按终稿改为 2025-01-15（示例）。 |
+| W03 | `#/w03`、待写纪要 | 编辑字段；取消丢弃草稿；未确认不写；驳回必填 | 取消或离开页面后恢复只读原文，重新编辑不残留 | [c-w03-edit-uncommitted.png](c-w03-edit-uncommitted.png)、[c-w03-rejected.png](c-w03-rejected.png)、[c-w03-committed.png](c-w03-committed.png) | 结论到权限、确认/编辑/驳回与终稿一致。拜访时间按终稿为 2025-01-15（示例）。编辑中有可见「取消」。 |
 | W04 | 禾川采纳后 | diff：阶段、¥120 万→¥135 万、交付承诺 | 确认写入后进入 W19 | [a-w04-diff.png](a-w04-diff.png) | 提交前 diff 的字段和按钮与终稿一致。 |
 | W05 | `#/w05` | 选联系人；开始初访 | 阶段为拜访·初访，进入 W06 | [w05-visit-prep.png](w05-visit-prep.png) | 三张准备卡、周敏默认选中、开始初访与终稿一致。 |
 | W06 | W05 开始初访 | 未答三项、语音示例、保存、敏感转人工、问同事 | 桌面与 390/430px；返回工作台 | [d-w06-notes.png](d-w06-notes.png)、[d-w06-mobile-390.png](d-w06-mobile-390.png)、[d-w06-mobile-430.png](d-w06-mobile-430.png) | 对象、三项未答、速记和敏感转人工与终稿一致。阶段保持拜访·初访，不改成图上的复访。离线草稿默认 2 条。未复刻手机状态栏。 |
@@ -20,16 +20,16 @@
 | W09 | 侧栏今日任务 | 待确认进 W21；禾川拜访进 W11；鲜源风险进 W20 | 角标随未完成任务变化；可进任务中心 | [a-w09-task.png](a-w09-task.png) | 待确认、拜访、风险和 AI 优先级与终稿一致。角标不再写死，初始为 5。 |
 | W10 | 侧栏能力中心 | 报价测算查看详情，进入 W16 | 八张技能仍可筛选 | [w10-capability-center.png](w10-capability-center.png) | 八张技能和筛选与终稿一致。图上按钮是确认写入/编辑/驳回；按计划改成可进入详情，避免直接跳到完成页。 |
 | W11 | 本周日程；W09 禾川 10:00 | 点日程切换右栏；华粮试吃才出样品 | 禾川下一步不进华粮报价 | [f-w11-hechuan.png](f-w11-hechuan.png)、[f-w11-hualiang.png](f-w11-hualiang.png) | 三日程和样品清单与终稿一致。图上右栏默认华粮且时间轴重复 11:00；按计划改为跟随选中日程，小时轴不重复。 |
-| W12 | 报价单、华粮会话、华粮样品下一步 | 华粮 ¥343.2 万；编辑未确认不写；审批留在华粮 | 禾川落点另为 ¥135 万 | [f-w12-hualiang.png](f-w12-hualiang.png)、[f-w12-hechuan-sheet.png](f-w12-hechuan-sheet.png) | 华粮表、18% 和「不改变商机阶段」与终稿一致。 |
+| W12 | 报价单、华粮会话、华粮样品下一步 | 华粮 ¥343.2 万；编辑可取消；审批留在华粮 | 取消或离开页面不写入说明；禾川落点另为 ¥135 万 | [f-w12-hualiang.png](f-w12-hualiang.png)、[f-w12-hechuan-sheet.png](f-w12-hechuan-sheet.png) | 华粮表、18% 和「不改变商机阶段」与终稿一致。编辑中有可见「取消」。 |
 | W13 | 回款提醒 | 点鲜源逾期行打开 W20 | 摘要 ¥104 / ¥20 / 逾期 1 笔 | [w13-payment-warning.png](w13-payment-warning.png) | 三行客户、金额和状态与终稿一致。 |
 | W14 | 侧栏新线索 | 四卡；点禾川进详情 | 待分配、公海池仍未展开 | [a-w14-leads.png](a-w14-leads.png) | 四条线索、展会、86、↑8、高意向与终稿一致。右栏比终稿简。 |
 | W15 | W14 禾川卡 | 评分轴；关注点；转为商机 | 可返回列表；离开线索到 W02 | [a-w15-detail.png](a-w15-detail.png) | 78→82→86、低钠/稳定性/账期和转为商机与终稿一致。 |
 | W16 | W10 报价测算 | 看步骤；在对话中使用 | 进入禾川 W17 | [a-w16-detail.png](a-w16-detail.png) | 触发、输入、步骤、输出、人工确认和主按钮与终稿一致。右栏主路径是禾川，华粮只作历史。 |
 | W17 | W16 在对话中使用 | 三步运行；完成 / 失败 / 为什么调用 | 会话「禾川报价测算」 | [a-w17-running.png](a-w17-running.png)、[b-w17-retry.png](b-w17-retry.png) | 三步和「计算中」与终稿一致。图上的「报价为动作模块」已删除。示例开关是计划要求的确定性入口。 |
 | W18 | W17 完成测算 | A/B 互斥；采纳 / 修改 / 转人工 | 采纳进 W04；右栏 ¥135 万 | [a-w18-result.png](a-w18-result.png) | 合计 ¥135 万、毛利 22%、账期 45 天和三个按钮与终稿一致。产线 A 按计划用 ¥27.3 万，不用图上的 ¥42 万。 |
-| W19 | W04 确认写入 | 看进度和还差谁 | ¥135 万；王磊已通过；陈静审核中；赵敏未开始 | [a-w19-progress.png](a-w19-progress.png) | 合同、金额和四步责任人与终稿一致。呈现是纵向步骤，不是图上的横向轨道。 |
+| W19 | W04 确认写入 | 看进度和还差谁 | ¥135 万；王磊已通过；陈静审核中；赵敏未开始 | [a-w19-progress.png](a-w19-progress.png) | 合同、金额和四步责任人与终稿一致。步骤只保留列表自身编号，正文不再重复写 1–4。 |
 | W20 | W13 鲜源行 | 沟通计划；加入今日任务 | 马丽属于鲜源；任务进入 W09 / W24 | [a-w20-plan.png](a-w20-plan.png)、[a-w09-task.png](a-w09-task.png)、[a-w24-collect.png](a-w24-collect.png) | 逾期、¥36 万、15:00、马丽·财务和主按钮与终稿一致。 |
-| W21 | W09 / W24 待确认 | 展开事实卡；确认 / 编辑 / 驳回 | 可见依据和需确认部门 | [c-w21-states.png](c-w21-states.png)、[e-w21-from-task.png](e-w21-from-task.png) | 推断 / 事实 / 待审批，以及展会纪要和技术部，与终稿一致。 |
+| W21 | W09 / W24 待确认 | 展开事实卡、推断卡、待审批卡 | 各卡使用自己的依据；推断卡不引用事实卡的展会纪要 | [c-w21-states.png](c-w21-states.png)、[e-w21-from-task.png](e-w21-from-task.png) | 事实卡仍是展会纪要与技术部。推断卡是刘峰未答问题及不确定性。待审批卡是 ¥135 万尚未提交。 |
 | W22 | W17 测算失败 | 转人工；本地价表；回答反问 | 转人工进 W24；对象仍是禾川 | [b-w22-exception.png](b-w22-exception.png) | 三块同屏与终稿一致。错误阶段标签已删除。清单用按钮，不是图上的复选框。 |
 | W23 | W17 为什么调用 | 阅读规则、模型和 0.86；换一个能力 | 回到 W10 或 W16 | [b-w23-why.png](b-w23-why.png) | 三项说明、置信度和换能力与终稿一致。错误阶段标签已删除。 |
 | W24 | W09 任务中心；W20 / W22 转入 | 分组查看；完成；待确认进 W21 | 中栏标题是「任务中心」 | [a-w24-collect.png](a-w24-collect.png)、[b-w24-manual.png](b-w24-manual.png) | 进行中 / 待确认 / 已完成，以及催款和转人工，与终稿一致。 |
@@ -49,8 +49,12 @@
 
 ## 测试记录
 
-- 开发服务 `http://127.0.0.1:5173/`：26/26 通过，控制台无报错。
-- 静态产物 `python3 -m http.server 4173 --directory docs`，地址 `http://127.0.0.1:4173/`：同一脚本 26/26 通过，控制台无报错。这一轮截图来自该静态产物。
+- 开发服务与静态 `docs/`：27/27 通过。诊断分开记录 pageerror、console.error、requestfailed、HTTP ≥ 400，静态产物这四类都是空的。`docs/favicon.svg` 在静态服务上 HTTP 200，`content-type` 为 `image/svg+xml`。
+- 当前线上 `ee7cf9fd` 的 390/430 截图见 `live-ee7cf9f/`。该版本的 `favicon.svg` 仍是 HTTP 404；页面自动请求在 Playwright 里没有单独冒泡成 console.error，显式请求记录为 404。pageerror 与 requestfailed 为空。
+
+## 线上 ee7cf9fd 的移动视口
+
+当前仍在线的合并版本，用真实 Playwright 打开 https://linyichen12138.github.io/ai-sales-assistant-demo-v2/#/w06 。390 与 430 会隐藏右栏，W05 的「开始初访」不可见，所以直接进入 `#/w06`，再点「进入访后确认」到 `#/w07`。视口是 390×844 和 430×900。步骤和断言在 [live-ee7cf9f/README.md](live-ee7cf9f/README.md)。该次运行的 pageerror、console.error、requestfailed 为空；显式请求 `favicon.svg` 为 HTTP 404，不记成零错误。
 
 ## 明确未做
 

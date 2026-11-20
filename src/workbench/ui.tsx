@@ -1,5 +1,20 @@
-import { useState, type ReactNode } from 'react'
+import { useEffect, useState, type ReactNode } from 'react'
 import { useWb, type Decision } from './store'
+
+/** 离开页面时，未确认的编辑草稿丢弃，不写入。 */
+export function useDiscardUnconfirmed(id: string, keys: string[]) {
+  const key = keys.join('|')
+  useEffect(() => {
+    const fields = key ? key.split('|') : []
+    return () => {
+      const st = useWb.getState()
+      if ((st.decisions[id] ?? '待确认') === '编辑中') {
+        st.discardDrafts(fields)
+        st.setDecision(id, '待确认')
+      }
+    }
+  }, [id, key])
+}
 
 export function ALogo({ size = 26 }: { size?: number }) {
   return <svg width={size} height={size} viewBox="0 0 32 32" aria-label="A logo"><path d="M16 3 L29 29 H22.5 L16 15.5 L9.5 29 H3 Z" fill="#B75A3B" /><path d="M11.5 23 H20.5 L18.6 19.2 H13.4 Z" fill="#E98F70" /></svg>
@@ -41,10 +56,17 @@ export function Acts({ id, size = 'md', note = true, onConfirm, doneText = '已�
   const [rejecting, setRejecting] = useState(false)
   const reason = s.reasons[id] ?? ''
   const form: ActField[] = fields?.length ? fields : [{ key: `${id}.note`, label: '行动说明（示例）', initial: '' }]
+  const fieldKeys = form.map((f) => f.key)
+  useDiscardUnconfirmed(id, fieldKeys)
   const beginEdit = () => {
     const st = useWb.getState()
     for (const f of form) if (st.drafts[f.key] === undefined) st.setDraft(f.key, st.committed[f.key] ?? f.initial)
     st.setDecision(id, '编辑中')
+    setRejecting(false)
+  }
+  const cancelEdit = () => {
+    s.discardDrafts(fieldKeys)
+    s.setDecision(id, '待确认')
     setRejecting(false)
   }
   if (d === '已写入' || d === '已驳回') return <div className={`wb-acts done ${size}`} data-testid={`acts-${id}`}>
@@ -57,6 +79,7 @@ export function Acts({ id, size = 'md', note = true, onConfirm, doneText = '已�
         <input data-testid={`field-${f.key}`} value={s.drafts[f.key] ?? ''} onChange={(e) => s.setDraft(f.key, e.target.value)} />
       </label>)}
       <small className="wb-note">编辑中 · 未经确认不会写入</small>
+      <button className="wb-btn ghost" data-testid={`cancel-${id}`} onClick={cancelEdit}>取消</button>
     </div>}
     {rejecting && <div className="wb-reject" data-testid={`reject-form-${id}`}>
       <label className="wb-field">驳回原因（必填）

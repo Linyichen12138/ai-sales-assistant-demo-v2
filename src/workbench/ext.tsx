@@ -191,10 +191,10 @@ export function W19() {
       <p data-testid="contract-amount">合同金额 ¥135 万（示例）</p>
       <p className="wb-sub">{submitted ? '已由写入前 diff 确认提交（示例）。' : '示例：当前展示提交后进度，可从写入前 diff 确认提交后进入。'}</p>
       <ol className="wb-progress" data-testid="approval-progress">
-        <li data-state="done">1 提交 · 已完成 · 10月20日（示例）</li>
-        <li data-state="done">2 销售经理 王磊（示例） · 已通过 · 10月21日（示例）</li>
-        <li data-state="run">3 财务 陈静（示例） · 审核中</li>
-        <li data-state="wait">4 盖章 法务 · 赵敏（示例） · 未开始</li>
+        <li data-state="done">提交 · 已完成 · 10月20日（示例）</li>
+        <li data-state="done">销售经理 王磊（示例） · 已通过 · 10月21日（示例）</li>
+        <li data-state="run">财务 陈静（示例） · 审核中</li>
+        <li data-state="wait">盖章 法务 · 赵敏（示例） · 未开始</li>
       </ol>
       <p data-testid="approval-gap">还差「财务 · 陈静（示例）」「法务 · 赵敏（示例）」盖章。</p>
       <div className="wb-acts-row">
@@ -227,9 +227,9 @@ export function W20() {
 }
 
 const W21_CARDS = [
-  { id: 'infer', kind: '推断', title: '补发技术资料给刘峰（示例）', open: false },
-  { id: 'fact', kind: '事实', title: '跟进周敏确认采购窗口', open: true },
-  { id: 'approve', kind: '待审批', title: '签约 · 正式合同待王磊审批（示例）', open: false },
+  { id: 'infer', kind: '推断', title: '补发技术资料给刘峰（示例）', basis: '依据：复访纪要里刘峰的技术评估仍有 3 项未答（示例）', extra: '不确定性：检测报告、留样追溯和试产周期是否都要补发，尚未与刘峰确认（示例）' },
+  { id: 'fact', kind: '事实', title: '跟进周敏确认采购窗口', basis: '依据：展会纪要与邮件确认（示例）', extra: '需确认部门：技术部（示例）' },
+  { id: 'approve', kind: '待审批', title: '签约 · 正式合同待王磊审批（示例）', basis: '依据：禾川报价测算口径为 ¥135 万，尚未提交组长审批（示例）', extra: '不确定性：王磊确认前，正式合同不会写入（示例）' },
 ] as const
 
 export function W21() {
@@ -241,8 +241,7 @@ export function W21() {
       <p className="wb-sub">行动卡片三态（示例）。这是待确认区的展开，不是另一套任务系统。</p>
       {W21_CARDS.map((c) => <Card key={c.id} data-testid={`w21-${c.id}`}>
         <div className="wb-card-h"><button className="wb-textbtn" data-testid={`w21-toggle-${c.id}`} onClick={() => setOpen(open === c.id ? '' : c.id)}><span className={`wb-kind ${c.kind === '事实' ? 'fact' : c.kind === '待审批' ? 'approve' : ''}`}>{c.kind}</span> {c.title}</button></div>
-        {open === c.id && c.id === 'fact' && <div data-testid="w21-basis"><p>依据：展会纪要与邮件确认（示例）</p><p>需确认部门：技术部（示例）</p></div>}
-        {open === c.id && c.id !== 'fact' && <p className="wb-sub">收起态的依据可展开查看。当前示例展开以「跟进周敏确认采购窗口」为准。</p>}
+        {open === c.id && <div data-testid={c.id === 'fact' ? 'w21-basis' : `w21-basis-${c.id}`}><p>{c.basis}</p><p>{c.extra}</p></div>}
         <Acts id={`w21-${c.id}`} fields={[{ key: `w21.${c.id}`, label: '行动说明（示例）', initial: c.title }]} />
       </Card>)}
     </main>

@@ -33,6 +33,7 @@ interface WbState {
   resetOpen: () => void
   notify: (t: string) => void
   setDraft: (key: string, value: string) => void
+  discardDrafts: (keys: string[]) => void
   confirmFields: (keys: string[]) => void
   setReason: (id: string, value: string) => void
   setScheduleFocus: (f: ScheduleFocus) => void
@@ -87,6 +88,11 @@ export const useWb = create<WbState>((set) => ({
   resetOpen: () => set({ open: {} }),
   notify: (t) => { clearTimeout(timer); set({ toast: t }); timer = setTimeout(() => set({ toast: null }), 2200) },
   setDraft: (key, value) => set((s) => ({ drafts: { ...s.drafts, [key]: value } })),
+  discardDrafts: (keys) => set((s) => {
+    const drafts = { ...s.drafts }
+    for (const k of keys) delete drafts[k]
+    return { drafts }
+  }),
   confirmFields: (keys) => set((s) => {
     const committed = { ...s.committed }
     for (const k of keys) if (s.drafts[k] !== undefined) committed[k] = s.drafts[k]

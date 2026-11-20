@@ -7,17 +7,24 @@ const out = 'docs/acceptance-20261120'
 await mkdir(out, { recursive: true })
 const browser = await chromium.launch()
 const page = await browser.newPage({ viewport: { width: 1440, height: 900 } })
-const errs = []
-page.on('console', (m) => { if (m.type() === 'error') errs.push(m.text()) })
-page.on('pageerror', (e) => errs.push(String(e)))
+const buckets = { pageerror: [], consoleError: [], requestFailed: [], httpError: [] }
+function watch(p) {
+  p.on('pageerror', (e) => buckets.pageerror.push(String(e)))
+  p.on('console', (m) => { if (m.type() === 'error') buckets.consoleError.push(m.text()) })
+  p.on('requestfailed', (r) => buckets.requestFailed.push(`${r.failure()?.errorText || 'failed'} ${r.url()}`))
+  p.on('response', (r) => { if (r.status() >= 400) buckets.httpError.push(`${r.status()} ${r.url()}`) })
+}
+watch(page)
 const results = []
 async function text() { return (await page.locator('#root').innerText()).replace(/\s+/g, ' ') }
 async function shot(name) { await page.screenshot({ path: `${out}/${name}.png` }) }
 async function check(id, name, fn) {
-  const e0 = errs.length
+  const c0 = buckets.consoleError.length
+  const p0 = buckets.pageerror.length
   try {
     await fn()
-    if (errs.length > e0) throw new Error('控制台报错: ' + errs.slice(e0).join(' | '))
+    const fresh = [...buckets.consoleError.slice(c0), ...buckets.pageerror.slice(p0)]
+    if (fresh.length) throw new Error('控制台或 pageerror: ' + fresh.join(' | '))
     results.push({ id, name, ok: true })
     console.log('PASS', id, name)
   } catch (e) {
@@ -117,6 +124,8 @@ await check('A7', '确认提交进入 W19', async () => {
   await page.getByTestId('w04-commit').click()
   await hash('#/w19')
   await has('禾川食品 · 正式合同', '¥135 万', '王磊', '已通过', '陈静', '审核中', '赵敏', '未开始', '还差')
+  const prog = (await page.getByTestId('approval-progress').innerText()).replace(/\d{1,2}月\d{1,2}日/g, '')
+  if (/\d+\s*[.、)]\s*\d+/.test(prog)) throw new Error('W19 步骤编号重复: ' + prog)
   await shot('a-w19-progress')
 })
 
@@ -223,7 +232,54 @@ await check('C4', '三态展开依据与部门', async () => {
   await page.goto(base + '#/w09')
   await page.getByTestId('w09-open-w09-window').click()
   await hash('#/w21'); await has('推断', '事实', '待审批', '依据：展会纪要与邮件确认（示例）', '需确认部门：技术部（示例）')
+  await page.getByTestId('w21-toggle-infer').click()
+  await has('依据：复访纪要里刘峰的技术评估仍有 3 项未答（示例）', '不确定性：检测报告、留样追溯和试产周期是否都要补发，尚未与刘峰确认（示例）')
+  await lacks('依据：展会纪要与邮件确认（示例）')
+  await page.getByTestId('w21-toggle-approve').click()
+  await has('依据：禾川报价测算口径为 ¥135 万，尚未提交组长审批（示例）', '不确定性：王磊确认前，正式合同不会写入（示例）')
+  await lacks('复访纪要里刘峰')
   await shot('c-w21-states')
+})
+
+await check('C5', '取消编辑并跨页丢弃未确认草稿', async () => {
+  await page.getByTestId('reset-demo').click()
+  await page.goto(base + '#/w03')
+  const before = await page.getByTestId('w03-committed-next').innerText()
+  await page.getByTestId('w03-edit').click()
+  await page.getByTestId('field-w03.next').fill('临时草稿应被取消')
+  await page.getByTestId('w03-cancel').click()
+  if (await page.getByTestId('edit-form-w03').count()) throw new Error('取消后仍在编辑')
+  const after = await page.getByTestId('w03-committed-next').innerText()
+  if (after !== before || after.includes('临时草稿应被取消')) throw new Error('取消写入了纪要')
+  await page.getByTestId('w03-edit').click()
+  const again = await page.getByTestId('field-w03.next').inputValue()
+  if (again !== before) throw new Error('重新编辑仍残留草稿: ' + again)
+  await page.getByTestId('field-w03.next').fill('跨页草稿应丢弃')
+  await page.goto(base + '#/w01')
+  await page.goto(base + '#/w03')
+  if (await page.getByTestId('edit-form-w03').count()) throw new Error('跨页返回仍停留编辑')
+  if ((await page.getByTestId('w03-committed-next').innerText()).includes('跨页草稿应丢弃')) throw new Error('跨页后只读内容被改')
+  await page.getByTestId('w03-edit').click()
+  if ((await page.getByTestId('field-w03.next').inputValue()).includes('跨页草稿应丢弃')) throw new Error('跨页后草稿残留')
+  await page.getByTestId('w03-cancel').click()
+  await page.goto(base + '#/w12')
+  const note = await page.getByTestId('w12-committed-note').innerText()
+  await page.getByTestId('edit-w12-quote').click()
+  await page.getByTestId('field-w12.note').fill('华粮临时草稿')
+  await page.getByTestId('cancel-w12-quote').click()
+  if (await page.getByTestId('edit-form-w12-quote').count()) throw new Error('华粮取消后仍在编辑')
+  const note2 = await page.getByTestId('w12-committed-note').innerText()
+  if (note2 !== note || note2.includes('华粮临时草稿')) throw new Error('华粮取消写入了说明')
+  await page.getByTestId('edit-w12-quote').click()
+  if ((await page.getByTestId('field-w12.note').inputValue()).includes('华粮临时草稿')) throw new Error('华粮重新编辑残留')
+  await page.getByTestId('field-w12.note').fill('华粮跨页草稿')
+  await page.goto(base + '#/w01')
+  await page.goto(base + '#/w12')
+  if (await page.getByTestId('edit-form-w12-quote').count()) throw new Error('华粮跨页仍在编辑')
+  const note3 = await page.getByTestId('w12-committed-note').innerText()
+  if (note3.includes('华粮跨页草稿')) throw new Error('华粮跨页写入了说明')
+  await page.getByTestId('edit-w12-quote').click()
+  if ((await page.getByTestId('field-w12.note').inputValue()).includes('华粮跨页草稿')) throw new Error('华粮跨页草稿残留')
 })
 
 await check('D1', '开始初访进入现场速记', async () => {
@@ -250,7 +306,7 @@ await check('D1', '开始初访进入现场速记', async () => {
 
 await check('D2', '移动宽度现场记录', async () => {
   const mobile = await browser.newPage({ viewport: { width: 390, height: 844 } })
-  mobile.on('pageerror', (e) => errs.push(String(e)))
+  watch(mobile)
   await mobile.goto(base + '#/w06')
   await mobile.getByTestId('page-w06').waitFor()
   const t = (await mobile.locator('#root').innerText()).replace(/\s+/g, ' ')
@@ -354,6 +410,12 @@ await check('R1', 'W01–W13 仍可达且无错误标签', async () => {
 })
 
 const failed = results.filter((r) => !r.ok)
-console.log(JSON.stringify({ passed: results.length - failed.length, failed: failed.length, results, consoleErrors: errs }, null, 2))
+const diagnostics = {
+  pageerror: buckets.pageerror,
+  consoleError: buckets.consoleError,
+  requestFailed: buckets.requestFailed,
+  httpError: buckets.httpError,
+}
+console.log(JSON.stringify({ passed: results.length - failed.length, failed: failed.length, results, diagnostics }, null, 2))
 await browser.close()
-process.exit(failed.length ? 1 : 0)
+process.exit(failed.length || diagnostics.pageerror.length || diagnostics.consoleError.length || diagnostics.requestFailed.length || diagnostics.httpError.length ? 1 : 0)

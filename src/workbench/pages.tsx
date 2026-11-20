@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { HECHUAN, HECHUAN_QUOTE, HUALIANG, XIANYUAN } from './fixtures'
 import { useWb } from './store'
-import { Acts, AiAva, Card, Ico, Pill, UserAva } from './ui'
+import { Acts, AiAva, Card, Ico, Pill, UserAva, useDiscardUnconfirmed } from './ui'
 
 const OPP = '禾川食品 · 2027 调味料供货商机（示例）'
 
@@ -87,6 +87,12 @@ export function W03() {
     if (s.drafts['w03.next'] === undefined) s.setDraft('w03.next', next)
     s.setDecision('w03-card', '编辑中'); setDiff(false); setRej(false)
   }
+  const cancelEdit = () => {
+    s.discardDrafts(['w03.points', 'w03.next'])
+    s.setDecision('w03-card', '待确认')
+    setDiff(false)
+  }
+  useDiscardUnconfirmed('w03-card', ['w03.points', 'w03.next'])
   return <>
     <main className="wb-main" data-testid="page-w03">
       <Ctx text={OPP} pill="拜访 · 复访" />
@@ -117,6 +123,7 @@ export function W03() {
             <label className="wb-field">沟通要点（示例）<textarea data-testid="field-w03.points" value={s.drafts['w03.points'] ?? ''} onChange={(e) => s.setDraft('w03.points', e.target.value)} /></label>
             <label className="wb-field">下一步（示例）<input data-testid="field-w03.next" value={s.drafts['w03.next'] ?? ''} onChange={(e) => s.setDraft('w03.next', e.target.value)} /></label>
             <small className="wb-note">编辑中 · 未经确认不会写入。左侧纪要仍是已确认内容。</small>
+            <button className="wb-btn ghost" data-testid="w03-cancel" onClick={cancelEdit}>取消</button>
           </div>}
           {!diff && <div className="wb-acts-row lg"><button className="wb-btn primary" data-testid="w03-open-diff" onClick={() => { setDiff(true); setRej(false) }}>确认写入</button><button className="wb-btn ghost" data-testid="w03-edit" onClick={beginEdit}>编辑</button><button className="wb-btn danger solid" data-testid="w03-reject" onClick={() => { setRej(true); setDiff(false) }}>驳回</button></div>}
           {diff && <div className="wb-diff" data-testid="w03-diff"><h4>写入前 diff · 拜访纪要（示例数据）</h4>
